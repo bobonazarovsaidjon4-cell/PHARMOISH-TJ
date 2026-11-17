@@ -1,0 +1,1415 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7fb">
+  <meta name="description" content="PHARMOISH TJ — кабинет для поиска поставщиков и управления заявками на закупку.">
+  <title>PHARMOISH TJ — кабинет закупок</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #20243a;
+      --muted: #85899d;
+      --blue: #4b57d5;
+      --blue-dark: #3944bc;
+      --blue-soft: #eef0ff;
+      --canvas: #f5f6fa;
+      --line: #eceef4;
+      --white: #fff;
+      --green: #2f9b72;
+      --shadow: 0 8px 26px rgba(39, 48, 91, .055);
+    }
+    * { box-sizing: border-box; }
+    body { min-width: 320px; min-height: 100vh; margin: 0; background: var(--canvas); color: var(--ink); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 13px; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .app { min-height: 100vh; display: grid; grid-template-columns: 238px minmax(0, 1fr); }
+    .sidebar { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; padding: 25px 15px 16px; border-right: 1px solid #e9ebf2; background: #fff; }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 0 10px 32px; color: inherit; text-decoration: none; }
+    .brand-icon { width: 37px; height: 37px; display: grid; place-items: center; border-radius: 12px; background: linear-gradient(145deg, #6370ed, #3948c1); color: white; font-size: 19px; font-weight: 900; box-shadow: 0 5px 12px rgba(76, 88, 213, .22); }
+    .brand-logo { width: 48px; height: 48px; flex: 0 0 48px; object-fit: contain; filter: drop-shadow(0 5px 10px rgba(58, 68, 153, .17)); }
+    .brand-name { font-size: 17px; font-weight: 850; letter-spacing: -.6px; }
+    .brand-caption { margin-top: 3px; color: #9296a7; font-size: 9px; }
+    .workspace-select { display: flex; align-items: center; justify-content: space-between; margin: 0 4px 27px; padding: 11px 10px; border: 1px solid var(--line); border-radius: 11px; background: #fcfcfe; }
+    .workspace-label { color: #979bad; font-size: 9px; }
+    .workspace-name { margin-top: 3px; font-size: 11px; font-weight: 750; }
+    .nav-section { margin: 0 10px 9px; color: #a0a4b2; font-size: 9px; font-weight: 800; letter-spacing: 1px; }
+    .sidebar-nav { display: grid; gap: 4px; }
+    .nav-item { width: 100%; display: flex; align-items: center; gap: 12px; padding: 11px 12px; border: 0; border-radius: 9px; background: transparent; color: #62677c; text-align: left; font-size: 12px; transition: .18s ease; }
+    .nav-item:hover { background: #f6f7fc; color: var(--blue); }
+    .nav-item.active { background: #eef0ff; color: #4553d0; font-weight: 750; }
+    .nav-icon { width: 17px; flex: 0 0 17px; color: currentColor; font-size: 15px; text-align: center; }
+    .nav-badge { min-width: 19px; margin-left: auto; padding: 3px 6px; border-radius: 20px; background: #f0f1f8; color: #85899b; font-size: 9px; text-align: center; }
+    .nav-item.active .nav-badge { background: #fff; color: var(--blue); }
+    .sidebar-spacer { flex: 1; }
+    .profile { display: flex; align-items: center; gap: 9px; padding: 14px 5px 0; border-top: 1px solid var(--line); }
+    .avatar { width: 34px; height: 34px; display: grid; flex: 0 0 34px; place-items: center; border-radius: 50%; background: #e8eaff; color: #4552ca; font-size: 11px; font-weight: 800; }
+    .profile-name { font-size: 11px; font-weight: 750; }
+    .profile-role { margin-top: 3px; color: #9296a7; font-size: 9px; }
+    .profile-menu { margin-left: auto; border: 0; background: transparent; color: #888da0; }
+
+    .main { min-width: 0; padding: 0 28px 30px; }
+    .topbar { min-height: 91px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .page-title { margin: 0; font-size: 20px; letter-spacing: -.65px; }
+    .page-subtitle { margin-top: 5px; color: var(--muted); font-size: 11px; }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .icon-button { position: relative; width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid transparent; border-radius: 10px; background: transparent; color: #777d91; font-size: 16px; }
+    .icon-button:hover { border-color: var(--line); background: white; }
+    .notification-dot { position: absolute; top: 7px; right: 7px; width: 6px; height: 6px; border: 1px solid white; border-radius: 50%; background: #ed6f79; }
+    .primary-button { min-height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 15px; border: 0; border-radius: 9px; background: linear-gradient(110deg, #5865e5, #424fc9); box-shadow: 0 5px 12px rgba(76, 88, 213, .14); color: white; font-size: 11px; font-weight: 750; transition: .18s ease; }
+    .primary-button:hover { transform: translateY(-1px); background: var(--blue-dark); box-shadow: 0 8px 16px rgba(76, 88, 213, .2); }
+    .secondary-button { min-height: 34px; padding: 0 11px; border: 1px solid var(--line); border-radius: 8px; background: white; color: #62677c; font-size: 10px; font-weight: 700; }
+    .secondary-button:hover { border-color: #cdd1ee; color: var(--blue); }
+    .view { display: none; }
+    .view.active { display: block; }
+    .dashboard-layout { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(265px, .92fr); align-items: start; gap: 18px; }
+    .left-column, .right-column { min-width: 0; display: grid; gap: 17px; }
+    .panel { min-width: 0; padding: 19px; border: 1px solid #eceef4; border-radius: 13px; background: white; box-shadow: var(--shadow); }
+    .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 17px; }
+    .panel-title { margin: 0; font-size: 13px; font-weight: 800; letter-spacing: -.2px; }
+    .subtle-select { padding: 7px 9px; border: 1px solid var(--line); border-radius: 7px; background: white; color: #6f7488; font-size: 10px; }
+    .savings-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 0 0 14px; }
+    .saving { min-width: 0; padding: 8px 10px; border-radius: 9px; background: #fafaff; }
+    .saving-head { display: flex; align-items: center; justify-content: space-between; gap: 5px; color: #85899d; font-size: 9px; }
+    .saving-value { margin-top: 5px; font-size: 15px; font-weight: 800; letter-spacing: -.35px; }
+    .trend { padding: 3px 5px; border-radius: 5px; background: #e6f6ed; color: #30946b; font-size: 8px; font-weight: 800; white-space: nowrap; }
+    .trend.down { background: #fdebed; color: #cc6270; }
+    .chart { height: 208px; display: grid; grid-template-columns: 29px minmax(0, 1fr); gap: 8px; padding-top: 7px; }
+    .y-axis { display: flex; flex-direction: column; justify-content: space-between; padding: 0 0 20px; color: #a0a4b2; font-size: 8px; text-align: right; }
+    .chart-main { position: relative; display: flex; align-items: stretch; justify-content: space-around; gap: 9px; padding: 10px 0 0; border-bottom: 1px solid #eceef4; background: repeating-linear-gradient(to bottom, transparent 0, transparent 47px, #f1f2f7 48px); }
+    .bar-group { height: 100%; min-width: 9px; flex: 1; display: flex; flex-direction: column; justify-content: end; align-items: center; gap: 0; }
+    .bar-stack { width: min(24px, 85%); height: var(--bar-height); display: flex; flex-direction: column; justify-content: end; overflow: hidden; border-radius: 4px 4px 0 0; }
+    .bar-blue { flex: 1; background: #5362dc; }
+    .bar-cyan { height: 27%; flex: 0 0 27%; background: #43b7dc; }
+    .bar-lavender { height: 12%; flex: 0 0 12%; background: #a1a5ef; }
+    .bar-month { height: 18px; padding-top: 5px; color: #85899d; font-size: 8px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 13px; margin-top: 13px; color: #85899d; font-size: 9px; }
+    .legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .legend-dot { width: 7px; height: 7px; border-radius: 2px; background: #5362dc; }
+    .legend-dot.cyan { background: #43b7dc; }
+    .legend-dot.lavender { background: #a1a5ef; }
+    .recent-list { display: grid; gap: 0; }
+    .recent-item { padding: 14px 0; border-top: 1px solid #f0f1f5; }
+    .recent-item:first-child { padding-top: 0; border-top: 0; }
+    .recent-top { display: flex; justify-content: space-between; gap: 8px; }
+    .recent-name { max-width: 185px; font-size: 11px; font-weight: 800; line-height: 1.4; }
+    .recent-company { margin-top: 4px; color: #8b8fa1; font-size: 8px; letter-spacing: .55px; text-transform: uppercase; }
+    .status { flex: 0 0 auto; align-self: flex-start; padding: 4px 7px; border-radius: 20px; font-size: 8px; font-weight: 750; }
+    .status.pending { background: #fff1e6; color: #d3854d; }
+    .status.reviewed { background: #e9edff; color: #5967cf; }
+    .status.approved { background: #e4f6ed; color: #36946e; }
+    .recent-meta { display: flex; justify-content: space-between; gap: 8px; margin: 11px 0; color: #777d91; font-size: 9px; }
+    .recent-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .recent-actions button { min-height: 30px; }
+    .recent-actions .primary-button { padding: 0 8px; font-size: 9px; }
+    .panel-link { border: 0; background: transparent; color: var(--blue); font-size: 10px; font-weight: 750; }
+    .suppliers-heading { margin-bottom: 14px; }
+    .supplier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+    .supplier-card { min-width: 0; padding: 14px; border: 1px solid #eceef4; border-radius: 11px; transition: .18s; }
+    .supplier-card:hover { border-color: #d1d5f0; box-shadow: 0 6px 16px rgba(39, 48, 91, .06); }
+    .supplier-main { display: flex; align-items: center; gap: 9px; }
+    .supplier-logo { width: 32px; height: 32px; display: grid; flex: 0 0 32px; place-items: center; border-radius: 9px; background: #f2f3ff; color: var(--blue); font-size: 12px; font-weight: 850; }
+    .supplier-card h3 { overflow: hidden; margin: 0; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+    .supplier-sector { margin-top: 4px; color: #8b8fa1; font-size: 8px; }
+    .tags { display: flex; flex-wrap: wrap; gap: 5px; margin: 12px 0; }
+    .tag { padding: 4px 6px; border-radius: 5px; background: #f5f6fa; color: #6e7488; font-size: 8px; }
+    .supplier-info { display: flex; justify-content: space-between; gap: 7px; margin-top: 8px; color: #777d91; font-size: 8px; }
+    .supplier-info strong { color: #4d536b; font-size: 9px; }
+    .quote-button { width: 100%; min-height: 30px; margin-top: 12px; font-size: 9px; }
+    .empty-inline { padding: 19px 0; color: #9296a7; font-size: 10px; text-align: center; }
+    .section-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
+    .search { width: min(340px, 100%); min-height: 38px; padding: 0 12px; border: 1px solid var(--line); border-radius: 9px; background: white; color: var(--ink); font-size: 11px; }
+    .requests-table { width: 100%; border-collapse: collapse; }
+    .requests-table th, .requests-table td { padding: 13px 10px; border-bottom: 1px solid #f0f1f5; text-align: left; }
+    .requests-table th { color: #9296a7; font-size: 9px; font-weight: 700; }
+    .requests-table td { font-size: 10px; }
+    .table-title { color: var(--ink); font-weight: 750; }
+    .table-muted { display: block; margin-top: 4px; color: #9296a7; font-size: 9px; }
+    .table-action { border: 0; background: transparent; color: var(--blue); font-size: 10px; font-weight: 750; }
+    .supplier-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .supplier-list .supplier-card { padding: 18px; }
+    .analytics-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; margin-bottom: 17px; }
+    .metric { padding: 17px; border: 1px solid var(--line); border-radius: 11px; background: white; }
+    .metric-label { color: #85899d; font-size: 10px; }
+    .metric-value { margin-top: 8px; font-size: 22px; font-weight: 850; }
+    .metric-foot { margin-top: 5px; color: #45a278; font-size: 9px; }
+    .simple-content { color: #70768b; font-size: 11px; line-height: 1.7; }
+    .notice { margin-top: 14px; padding: 12px; border-radius: 9px; background: #f4f5ff; color: #626baa; font-size: 10px; line-height: 1.6; }
+
+    .dashboard-view { display: grid; gap: 18px; }
+    .dashboard-intro { display: flex; align-items: flex-end; justify-content: space-between; gap: 15px; }
+    .dashboard-intro h2 { margin: 0; font-size: 18px; letter-spacing: -.5px; }
+    .dashboard-intro p { margin: 5px 0 0; color: var(--muted); font-size: 10px; }
+    .demo-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px; border: 1px solid #ebe8da; border-radius: 999px; background: #fffcf4; color: #82754c; font-size: 9px; white-space: nowrap; }
+    .demo-badge::before { width: 6px; height: 6px; border-radius: 50%; background: #d3a94a; content: ""; }
+    .dashboard-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; }
+    .stat-card { min-width: 0; display: block; padding: 17px; border: 1px solid #e9ebf2; border-radius: 12px; background: #fff; color: inherit; text-align: left; box-shadow: 0 3px 14px rgba(39,48,91,.035); transition: border-color .18s, transform .18s, box-shadow .18s; }
+    .stat-card:hover { transform: translateY(-2px); border-color: #cfd4ef; box-shadow: 0 8px 22px rgba(39,48,91,.08); }
+    .stat-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #747a8e; font-size: 10px; }
+    .stat-icon { width: 31px; height: 31px; display: grid; place-items: center; border-radius: 9px; background: #f0f1ff; color: var(--blue); font-size: 14px; }
+    .stat-card:nth-child(2) .stat-icon { background: #eaf6ef; color: #378760; }
+    .stat-card:nth-child(3) .stat-icon { background: #eef7fa; color: #32829a; }
+    .stat-card:nth-child(4) .stat-icon { background: #fbf3e7; color: #a97931; }
+    .stat-value { display: block; margin-top: 13px; font-size: clamp(20px, 2.2vw, 27px); font-weight: 820; letter-spacing: -.8px; line-height: 1.05; }
+    .stat-foot { display: block; margin-top: 7px; color: #969bad; font-size: 9px; }
+    .dashboard-columns { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(285px, .85fr); align-items: start; gap: 16px; }
+    .dashboard-stack { min-width: 0; display: grid; gap: 16px; }
+    .dashboard-panel { min-width: 0; padding: 18px; border: 1px solid #e9ebf2; border-radius: 12px; background: white; box-shadow: 0 3px 14px rgba(39,48,91,.035); }
+    .dashboard-panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
+    .dashboard-panel-heading h3 { margin: 0; font-size: 13px; letter-spacing: -.15px; }
+    .dashboard-panel-heading p { margin: 5px 0 0; color: #9296a7; font-size: 9px; }
+    .period-tabs { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid #eceef4; border-radius: 8px; background: #f8f9fc; }
+    .period-tabs button { min-height: 25px; padding: 0 9px; border: 0; border-radius: 6px; background: transparent; color: #7a8093; font-size: 9px; }
+    .period-tabs button.active { background: white; color: #414cb5; font-weight: 750; box-shadow: 0 1px 3px #20243a12; }
+    .chart-summary { display: flex; align-items: baseline; gap: 8px; margin: 1px 0 3px; }
+    .chart-total { font-size: 21px; font-weight: 820; letter-spacing: -.5px; }
+    .chart-currency { color: #85899d; font-size: 10px; }
+    .procurement-chart { height: 194px; display: grid; grid-template-columns: 39px minmax(0, 1fr); gap: 9px; padding-top: 12px; }
+    .procurement-yaxis { display: flex; flex-direction: column; justify-content: space-between; padding-bottom: 23px; color: #a0a4b2; font-size: 8px; text-align: right; }
+    .procurement-bars { min-width: 0; display: flex; align-items: stretch; justify-content: space-around; gap: 7px; padding: 5px 3px 0; border-bottom: 1px solid #e9ebf2; background: repeating-linear-gradient(to bottom, transparent 0, transparent 39px, #f1f2f7 40px); }
+    .procurement-bar-group { min-width: 0; height: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 5px; }
+    .procurement-bar { width: min(25px, 72%); min-height: 3px; height: var(--bar-height); border-radius: 5px 5px 1px 1px; background: #6370dd; transition: height .25s ease, background .2s ease; }
+    .procurement-bar-group:hover .procurement-bar { background: #424fc9; }
+    .procurement-bar-label { max-width: 100%; overflow: hidden; color: #85899d; font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+    .dashboard-amount-note { margin-top: 10px; color: #999eac; font-size: 8px; }
+    .attention-list { display: grid; }
+    .attention-item { width: 100%; display: grid; grid-template-columns: 9px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 12px 0; border: 0; border-top: 1px solid #f0f1f5; background: transparent; color: inherit; text-align: left; }
+    .attention-item:first-child { border-top: 0; padding-top: 2px; }
+    .attention-item:hover .attention-copy strong { color: var(--blue); }
+    .attention-dot { width: 8px; height: 8px; border-radius: 50%; background: #d75f68; }
+    .attention-dot.orange { background: #dc9950; }
+    .attention-dot.yellow { background: #d4b142; }
+    .attention-dot.green { background: #48a77b; }
+    .attention-copy strong { display: block; font-size: 10px; font-weight: 750; }
+    .attention-copy small { display: block; margin-top: 3px; color: #969bad; font-size: 8px; }
+    .attention-count { min-width: 22px; padding: 4px 6px; border-radius: 7px; background: #f4f5f9; color: #62677c; font-size: 9px; font-weight: 750; text-align: center; }
+    .procurement-table-wrap { overflow-x: auto; }
+    .procurement-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+    .procurement-table th, .procurement-table td { padding: 11px 9px; border-bottom: 1px solid #f0f1f5; text-align: left; }
+    .procurement-table th { color: #9296a7; font-size: 8px; font-weight: 750; letter-spacing: .45px; }
+    .procurement-table td { color: #62677c; font-size: 9px; }
+    .procurement-table tr:last-child td { border-bottom: 0; }
+    .procurement-title { display: block; max-width: 270px; overflow: hidden; color: #30354b; font-size: 10px; font-weight: 750; text-overflow: ellipsis; }
+    .procurement-id { display: block; margin-top: 4px; color: #a0a4b2; font-size: 8px; }
+    .procurement-status { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border-radius: 999px; font-size: 8px; font-weight: 750; }
+    .procurement-status::before { width: 5px; height: 5px; border-radius: 50%; background: currentColor; content: ""; }
+    .procurement-status.open { background: #eaf6ef; color: #39835d; }
+    .procurement-status.review { background: #fff4e8; color: #b27836; }
+    .procurement-status.done { background: #eef0ff; color: #5965c8; }
+    .procurement-status.cancelled { background: #f1f2f5; color: #818697; }
+    .dashboard-link { border: 0; background: transparent; color: #4b57d5; font-size: 9px; font-weight: 750; white-space: nowrap; }
+    .dashboard-link:hover { color: #303cac; }
+    .supplier-card-dash { min-width: 0; padding: 14px; border: 1px solid #eceef4; border-radius: 10px; background: #fff; }
+    .supplier-dash-top { display: flex; align-items: center; gap: 9px; }
+    .supplier-dash-title { min-width: 0; }
+    .supplier-dash-title strong { display: block; overflow: hidden; color: #30354b; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+    .supplier-dash-title span { display: block; margin-top: 3px; color: #9296a7; font-size: 8px; }
+    .supplier-dash-meta { display: flex; flex-wrap: wrap; gap: 8px 12px; margin: 12px 0; color: #777d91; font-size: 8px; }
+    .supplier-dash-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+    .supplier-dash-tags .tag { margin: 0; }
+    .supplier-action { width: 100%; margin-top: 12px; }
+    .ai-dashboard-card { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 15px; padding: 17px 19px; border: 1px solid #e2e4f3; border-radius: 12px; background: #fafaff; }
+    .ai-dashboard-mark { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: #eef0ff; color: #4b57d5; font-size: 19px; }
+    .ai-dashboard-copy strong { display: block; font-size: 11px; }
+    .ai-dashboard-copy span { display: block; margin-top: 4px; color: #81869a; font-size: 9px; }
+    .ai-dashboard-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+    .ai-prompt-chip { min-height: 29px; padding: 0 9px; border: 1px solid #e3e5f1; border-radius: 999px; background: white; color: #62677c; font-size: 8px; }
+    .ai-prompt-chip:hover { border-color: #cdd1ee; color: #4b57d5; }
+    .dashboard-empty { padding: 20px; color: #9095a6; font-size: 10px; text-align: center; }
+    .secondary-nav-heading { margin: 20px 10px 8px; color: #a0a4b2; font-size: 9px; font-weight: 800; letter-spacing: 1px; }
+    .secondary-nav-heading:first-child { margin-top: 0; }
+    .dashboard-meta-label { margin-top: 8px; color: #989dae; font-size: 8px; }
+
+    .settings-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+    .settings-search { width: min(390px, 100%); min-height: 39px; padding: 0 12px; border: 1px solid var(--line); border-radius: 9px; background: white; color: var(--ink); font-size: 11px; }
+    .settings-layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); align-items: start; gap: 15px; }
+    .settings-menu { position: sticky; top: 14px; display: grid; gap: 3px; padding: 9px; border: 1px solid var(--line); border-radius: 12px; background: white; box-shadow: var(--shadow); }
+    .settings-menu button { display: flex; align-items: center; gap: 9px; padding: 10px 9px; border: 0; border-radius: 8px; background: transparent; color: #656b80; text-align: left; font-size: 10px; }
+    .settings-menu button:hover { background: #f7f8fc; color: var(--blue); }
+    .settings-menu button.active { background: var(--blue-soft); color: var(--blue); font-weight: 800; }
+    .settings-menu-icon { width: 16px; color: currentColor; text-align: center; }
+    .settings-content { min-width: 0; }
+    .settings-section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin: 3px 1px 14px; }
+    .settings-section-heading h2 { margin: 0; font-size: 15px; letter-spacing: -.3px; }
+    .settings-section-heading p { max-width: 650px; margin: 5px 0 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .settings-card { margin-bottom: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 11px; background: white; box-shadow: var(--shadow); }
+    .settings-card-title { margin: 0 0 12px; font-size: 11px; font-weight: 800; }
+    .settings-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px 15px; }
+    .setting-field { min-width: 0; display: grid; align-content: start; gap: 6px; }
+    .setting-field.full { grid-column: 1 / -1; }
+    .setting-label-row { display: flex; align-items: center; gap: 6px; color: #555c72; font-size: 10px; font-weight: 750; }
+    .setting-help { color: #9297a8; font-size: 9px; line-height: 1.5; }
+    .setting-input, .setting-select, .setting-textarea { width: 100%; min-height: 36px; padding: 8px 10px; border: 1px solid #e6e8ef; border-radius: 8px; background: white; color: var(--ink); font-size: 10px; }
+    .setting-textarea { min-height: 74px; resize: vertical; }
+    .setting-switch-row { min-height: 39px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 9px; border: 1px solid #eff0f5; border-radius: 8px; background: #fdfdff; }
+    .setting-switch-copy { min-width: 0; }
+    .setting-switch-copy .setting-label-row { font-size: 10px; }
+    .setting-switch-copy .setting-help { margin-top: 3px; }
+    .switch { position: relative; width: 34px; height: 19px; flex: 0 0 34px; padding: 0; border: 0; border-radius: 20px; background: #d7d9e2; transition: background .18s ease; }
+    .switch::after { position: absolute; top: 3px; left: 3px; width: 13px; height: 13px; border-radius: 50%; background: white; box-shadow: 0 1px 3px #0002; content: ""; transition: transform .18s ease; }
+    .switch[aria-checked="true"] { background: var(--blue); }
+    .switch[aria-checked="true"]::after { transform: translateX(15px); }
+    .switch:focus-visible, .settings-menu button:focus-visible { outline: 3px solid #bbc1ff; outline-offset: 2px; }
+    .list-editor { display: grid; gap: 6px; }
+    .list-row { display: flex; align-items: center; gap: 7px; }
+    .list-row .setting-input { flex: 1; }
+    .list-remove, .list-add { min-width: 31px; min-height: 31px; border: 1px solid var(--line); border-radius: 7px; background: white; color: #6f7488; }
+    .list-remove:hover { border-color: #f2c8ce; background: #fff5f6; color: #c64d5d; }
+    .list-add { width: max-content; padding: 0 10px; color: var(--blue); font-size: 9px; font-weight: 750; }
+    .settings-actions { position: sticky; z-index: 4; bottom: 10px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; padding: 11px; border: 1px solid var(--line); border-radius: 11px; background: rgba(255,255,255,.96); box-shadow: 0 6px 24px rgba(39,48,91,.09); backdrop-filter: blur(10px); }
+    .settings-actions-left, .settings-actions-right { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .settings-save-state { color: #83899b; font-size: 9px; }
+    .settings-save-state.unsaved { color: #c27a34; }
+    .danger-button { min-height: 34px; padding: 0 10px; border: 1px solid #f0d7d9; border-radius: 8px; background: white; color: #b94b59; font-size: 9px; font-weight: 750; }
+    .danger-button:hover { background: #fff6f6; }
+    .integration-secret-note { padding: 10px; border-radius: 8px; background: #fff8e9; color: #8a713d; font-size: 9px; line-height: 1.6; }
+    .audit-list { display: grid; gap: 0; }
+    .audit-entry { display: grid; grid-template-columns: 112px 1fr; gap: 10px; padding: 10px 0; border-top: 1px solid #f0f1f5; font-size: 9px; }
+    .audit-entry:first-child { border-top: 0; }
+    .audit-date { color: #9296a7; }
+    .audit-change { color: #555c72; line-height: 1.5; }
+    .settings-empty { padding: 28px 14px; border: 1px dashed #dfe2eb; border-radius: 10px; color: #8b90a1; font-size: 10px; text-align: center; }
+    .settings-permission { padding: 13px; border: 1px solid #f0e2bc; border-radius: 9px; background: #fff9ea; color: #806b36; font-size: 10px; line-height: 1.6; }
+
+    .ai-page { min-height: calc(100vh - 115px); display: flex; flex-direction: column; }
+    .ai-heading { margin: 0 0 17px; }
+    .ai-heading h2 { margin: 0; font-size: 19px; letter-spacing: -.6px; }
+    .ai-heading p { max-width: 700px; margin: 6px 0 0; color: var(--muted); font-size: 10px; line-height: 1.65; }
+    .ai-chat { min-height: 420px; flex: 1; display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: #fff; box-shadow: var(--shadow); }
+    .ai-chat-top { display: flex; align-items: center; gap: 10px; padding: 14px 17px; border-bottom: 1px solid var(--line); }
+    .ai-avatar { width: 34px; height: 34px; display: grid; flex: 0 0 34px; place-items: center; border-radius: 11px; background: var(--blue-soft); color: var(--blue); font-size: 17px; }
+    .ai-agent-name { font-size: 11px; font-weight: 800; }
+    .ai-agent-status { display: flex; align-items: center; gap: 5px; margin-top: 4px; color: #85899d; font-size: 9px; }
+    .ai-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #d7a348; }
+    .ai-status-dot.ready { background: #48a77b; }
+    .ai-messages { min-height: 0; flex: 1; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; padding: 20px; scroll-behavior: smooth; }
+    .ai-message { max-width: min(760px, 88%); display: flex; align-items: flex-start; gap: 9px; }
+    .ai-message.user { align-self: flex-end; flex-direction: row-reverse; }
+    .ai-message-avatar { width: 27px; height: 27px; flex: 0 0 27px; display: grid; place-items: center; border-radius: 9px; background: #f0f1ff; color: var(--blue); font-size: 11px; font-weight: 800; }
+    .ai-message.user .ai-message-avatar { background: #e8f4ee; color: #30865f; }
+    .ai-bubble { padding: 12px 14px; border: 1px solid #eff0f5; border-radius: 4px 13px 13px; background: #fafaff; color: #4e546b; font-size: 11px; line-height: 1.7; overflow-wrap: anywhere; white-space: pre-wrap; }
+    .ai-message.user .ai-bubble { border-color: #e3e7ff; border-radius: 13px 4px 13px 13px; background: #eef0ff; color: #343c86; }
+    .ai-welcome { max-width: 800px; }
+    .ai-quick { display: flex; flex-wrap: wrap; gap: 7px; margin: 2px 0 0 36px; }
+    .ai-quick button { min-height: 31px; padding: 0 10px; border: 1px solid #e4e6f1; border-radius: 8px; background: white; color: #646a80; font-size: 9px; transition: .18s ease; }
+    .ai-quick button:hover { border-color: #cdd1ee; background: #f7f8ff; color: var(--blue); }
+    .ai-typing { display: inline-flex; align-items: center; gap: 5px; color: #83889b; font-size: 10px; }
+    .ai-typing-dot { width: 5px; height: 5px; border-radius: 50%; background: #9298cf; animation: ai-pulse 1s infinite ease-in-out; }
+    .ai-typing-dot:nth-child(2) { animation-delay: .15s; }
+    .ai-typing-dot:nth-child(3) { animation-delay: .3s; }
+    @keyframes ai-pulse { 50% { opacity: .3; transform: translateY(-2px); } }
+    .ai-composer-wrap { padding: 13px 16px 15px; border-top: 1px solid var(--line); background: #fdfdff; }
+    .ai-composer { display: flex; align-items: end; gap: 9px; padding: 7px; border: 1px solid #e4e6ef; border-radius: 12px; background: white; transition: border-color .2s, box-shadow .2s; }
+    .ai-composer:focus-within { border-color: #b7bef0; box-shadow: 0 0 0 3px #eef0ff; }
+    .ai-composer textarea { min-height: 38px; max-height: 150px; flex: 1; resize: none; padding: 9px 8px; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 11px; line-height: 1.5; }
+    .ai-composer textarea::placeholder { color: #a0a4b2; }
+    .ai-send { width: 37px; height: 37px; flex: 0 0 37px; display: grid; place-items: center; border: 0; border-radius: 9px; background: var(--blue); color: white; font-size: 16px; transition: .18s ease; }
+    .ai-send:hover { background: var(--blue-dark); }
+    .ai-send:disabled { cursor: not-allowed; opacity: .55; }
+    .ai-caption { margin: 8px 3px 0; color: #9a9eae; font-size: 9px; }
+    .ai-page { position: relative; isolation: isolate; }
+    .ai-page::before { position: absolute; z-index: -1; top: 72px; right: 3%; width: 230px; height: 230px; border-radius: 50%; background: rgba(136, 115, 255, .13); content: ""; filter: blur(55px); pointer-events: none; }
+    .ai-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 20px; }
+    .ai-heading h2 { font-size: clamp(22px, 3vw, 29px); letter-spacing: -1px; }
+    .ai-heading p { max-width: 640px; font-size: 11px; }
+    .ai-heading::after { content: "FARMOISH AI"; flex: 0 0 auto; padding: 8px 11px; border: 1px solid #dedbff; border-radius: 999px; background: #f5f3ff; color: #6c5ce7; font-size: 9px; font-weight: 850; letter-spacing: .8px; }
+    .ai-chat { border-color: #e5e3f2; border-radius: 19px; background: rgba(255,255,255,.92); box-shadow: 0 18px 55px rgba(58, 52, 112, .1); }
+    .ai-chat-top { min-height: 70px; padding: 15px 20px; background: linear-gradient(115deg, #292448, #413477 65%, #5643a4); color: white; }
+    .ai-avatar { width: 40px; height: 40px; flex-basis: 40px; border: 1px solid rgba(255,255,255,.25); border-radius: 14px; background: linear-gradient(145deg, #9d8aff, #705be2); color: white; box-shadow: 0 5px 18px rgba(14, 8, 39, .24); }
+    .ai-agent-name { font-size: 12px; letter-spacing: .15px; }
+    .ai-agent-status { color: rgba(255,255,255,.72); }
+    .ai-status-dot { background: #ffcd70; box-shadow: 0 0 0 4px rgba(255,205,112,.16); }
+    .ai-status-dot.ready { background: #70e1ac; box-shadow: 0 0 0 4px rgba(112,225,172,.15); }
+    .ai-messages { gap: 18px; padding: 25px clamp(15px, 4vw, 35px); background: radial-gradient(ellipse at 2% 0%, rgba(120,105,235,.055), transparent 40%), #fdfdff; }
+    .ai-message { max-width: min(790px, 92%); gap: 11px; }
+    .ai-message-avatar { width: 32px; height: 32px; flex-basis: 32px; border: 1px solid #e7e2ff; border-radius: 11px; background: linear-gradient(145deg, #f3efff, #e9e5ff); color: #6b58d5; font-size: 9px; }
+    .ai-message.user .ai-message-avatar { border-color: #d7eee3; background: linear-gradient(145deg, #effaf4, #ddf3e7); color: #34815f; }
+    .ai-bubble { padding: 15px 17px; border-color: #eceaf5; border-radius: 5px 16px 16px; background: white; box-shadow: 0 5px 16px rgba(47, 42, 84, .045); font-size: 12px; line-height: 1.8; }
+    .ai-message.user .ai-bubble { border-color: #dedcff; border-radius: 16px 5px 16px 16px; background: linear-gradient(135deg, #f1f0ff, #e9e8ff); color: #39356a; }
+    .ai-quick { margin: 0 0 2px 43px; gap: 8px; }
+    .ai-quick button { min-height: 35px; padding: 0 12px; border-color: #e6e3f1; border-radius: 10px; background: #fff; font-size: 10px; }
+    .ai-quick button:hover { border-color: #c9c1ff; background: #f8f6ff; box-shadow: 0 4px 12px rgba(100,82,200,.08); }
+    .ai-composer-wrap { padding: 15px 19px 16px; border-color: #eeedf4; background: linear-gradient(#fff, #fbfaff); }
+    .ai-composer { padding: 8px; border-color: #e5e2f0; border-radius: 15px; box-shadow: 0 4px 14px rgba(55, 48, 101, .035); }
+    .ai-composer:focus-within { border-color: #a9a0f4; box-shadow: 0 0 0 4px rgba(114, 94, 225, .1); }
+    .ai-composer textarea { min-height: 42px; padding: 11px 10px; font-size: 12px; }
+    .ai-send { width: 42px; height: 42px; flex-basis: 42px; border-radius: 12px; background: linear-gradient(145deg, #7967ec, #5845ce); box-shadow: 0 6px 15px rgba(91, 73, 208, .22); }
+    .ai-send:hover { background: linear-gradient(145deg, #6d5bdc, #4734b8); }
+    .ai-caption { padding-left: 4px; }
+
+    dialog { width: min(520px, calc(100% - 24px)); max-height: 90vh; padding: 0; overflow: auto; border: 0; border-radius: 15px; box-shadow: 0 25px 90px rgba(25, 30, 65, .25); }
+    dialog::backdrop { background: rgba(25, 29, 52, .43); backdrop-filter: blur(3px); }
+    .dialog-inner { padding: 23px; }
+    .dialog-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 15px; margin-bottom: 18px; }
+    .dialog-heading h2 { margin: 0; font-size: 18px; letter-spacing: -.5px; }
+    .dialog-heading p { margin: 6px 0 0; color: var(--muted); font-size: 10px; line-height: 1.55; }
+    .close-button { width: 30px; height: 30px; flex: 0 0 30px; border: 0; border-radius: 8px; background: #f3f4f8; color: #747a8d; font-size: 18px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field { display: grid; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+    .field label { color: #62677c; font-size: 10px; font-weight: 750; }
+    .field input, .field select, .field textarea { width: 100%; padding: 10px 11px; border: 1px solid #e5e7ee; border-radius: 8px; background: white; color: var(--ink); font-size: 11px; }
+    .field textarea { min-height: 78px; resize: vertical; }
+    .form-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 17px; }
+    .form-hint { color: #9095a6; font-size: 9px; line-height: 1.5; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 18px 0; }
+    .detail-cell { padding: 11px; border-radius: 9px; background: #f7f8fc; }
+    .detail-label { color: #9296a7; font-size: 9px; }
+    .detail-value { margin-top: 5px; font-size: 11px; font-weight: 750; }
+    .detail-description { padding: 13px; border: 1px solid #eff0f5; border-radius: 9px; color: #656b80; font-size: 11px; line-height: 1.65; white-space: pre-wrap; }
+    .toast { position: fixed; z-index: 20; right: 20px; bottom: 20px; max-width: min(360px, calc(100% - 40px)); padding: 13px 16px; border: 1px solid #e2e5f1; border-radius: 10px; background: white; box-shadow: var(--shadow); color: #454d9c; font-size: 11px; opacity: 0; pointer-events: none; transform: translateY(10px); transition: .2s ease; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 1120px) {
+      .app { grid-template-columns: 205px minmax(0, 1fr); }
+      .main { padding-right: 19px; padding-left: 19px; }
+      .dashboard-layout { grid-template-columns: minmax(0, 1.3fr) minmax(245px, .85fr); gap: 13px; }
+      .dashboard-columns { grid-template-columns: minmax(0, 1.25fr) minmax(260px, .85fr); }
+      .panel { padding: 15px; }
+      .saving-value { font-size: 13px; }
+    }
+    @media (max-width: 820px) {
+      .app { grid-template-columns: minmax(0, 1fr); }
+      .sidebar { position: static; min-width: 0; height: auto; display: block; padding: 10px 16px; border-right: 0; border-bottom: 1px solid #e9ebf2; }
+      .brand { padding: 0 4px 9px; }
+      .workspace-select, .nav-section, .sidebar-spacer, .profile { display: none; }
+      .sidebar-nav { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px; }
+      .sidebar-nav { scrollbar-width: none; }
+      .sidebar-nav::-webkit-scrollbar { display: none; }
+      .nav-item { width: auto; flex: 0 0 auto; gap: 7px; padding: 9px 10px; white-space: nowrap; }
+      .nav-item .nav-badge { display: none; }
+      .main { min-width: 0; padding: 0 16px 24px; }
+      .topbar { min-height: 78px; }
+      .dashboard-layout { grid-template-columns: 1fr; }
+      .dashboard-columns { grid-template-columns: 1fr; }
+      .right-column { grid-template-columns: 1fr 1fr; align-items: start; }
+      .settings-layout { grid-template-columns: 1fr; }
+      .settings-menu { position: static; display: flex; overflow-x: auto; }
+      .settings-menu button { flex: 0 0 auto; }
+    }
+    @media (max-width: 560px) {
+      .topbar { gap: 8px; }
+      .page-title { font-size: 17px; }
+      .page-subtitle { max-width: 215px; font-size: 9px; }
+      .top-actions { gap: 3px; }
+      .top-actions .primary-button { min-height: 36px; padding: 0 10px; font-size: 9px; }
+      .icon-button { width: 30px; }
+      .panel { padding: 14px; }
+      .savings-row { gap: 6px; }
+      .saving { padding: 7px; }
+      .saving-head { display: block; line-height: 1.4; }
+      .saving-head .trend { display: inline-block; margin-top: 3px; }
+      .saving-value { font-size: 12px; }
+      .chart { height: 180px; }
+      .chart-main { gap: 5px; }
+      .right-column { grid-template-columns: 1fr; }
+      .dashboard-stats { grid-template-columns: 1fr 1fr; gap: 9px; }
+      .stat-card { padding: 13px; }
+      .dashboard-intro { align-items: flex-start; flex-direction: column; }
+      .dashboard-panel { padding: 14px; }
+      .dashboard-panel-heading { align-items: flex-start; }
+      .procurement-chart { height: 172px; grid-template-columns: 34px minmax(0, 1fr); gap: 5px; }
+      .procurement-bars { gap: 3px; }
+      .procurement-bar { width: min(20px, 82%); }
+      .ai-dashboard-card { grid-template-columns: auto minmax(0, 1fr); padding: 14px; }
+      .ai-dashboard-actions { grid-column: 1 / -1; justify-content: flex-start; }
+      .procurement-table { min-width: 650px; }
+      .supplier-grid, .supplier-list { grid-template-columns: 1fr; }
+      .analytics-cards { grid-template-columns: 1fr; }
+      .requests-table { min-width: 610px; }
+      .table-scroll { overflow-x: auto; }
+      .form-grid { grid-template-columns: 1fr; }
+      .field.full { grid-column: auto; }
+      .settings-fields { grid-template-columns: 1fr; }
+      .setting-field.full { grid-column: auto; }
+      .settings-actions { position: static; }
+      .settings-actions-left, .settings-actions-right { width: 100%; }
+      .settings-actions-right .primary-button, .settings-actions-right .secondary-button { flex: 1; }
+      .audit-entry { grid-template-columns: 1fr; gap: 4px; }
+      .ai-page { min-height: calc(100vh - 165px); }
+      .ai-chat { min-height: 430px; }
+      .ai-messages { padding: 14px; }
+      .ai-message { max-width: 96%; }
+      .ai-quick { margin-left: 0; }
+      .ai-caption { font-size: 8px; line-height: 1.5; }
+    }
+    @media (max-width: 340px) {
+      body { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <a class="brand" href="/#dashboard" aria-label="PHARMOISH TJ — панель управления"><img class="brand-logo" src="/images/logo.svg" alt="Логотип PHARMOISH TJ"><span><span class="brand-name">PHARMOISH TJ</span><span class="brand-caption" style="display:block">Кабинет закупок</span></span></a>
+      <div class="workspace-select"><div><div class="workspace-label">Рабочее пространство</div><div class="workspace-name">Моя компания</div></div><span aria-hidden="true">⌄</span></div>
+      <div class="nav-section">ГЛАВНОЕ</div>
+      <nav class="sidebar-nav" aria-label="Разделы кабинета">
+        <button class="nav-item active" type="button" data-view="dashboard"><span class="nav-icon">▦</span>Обзор</button>
+        <button class="nav-item" type="button" data-view="find"><span class="nav-icon">⌕</span>Найти закупки</button>
+        <button class="nav-item" type="button" data-view="quotes"><span class="nav-icon">▤</span>Мои заявки<span class="nav-badge" id="request-count">0</span></button>
+        <button class="nav-item" type="button" data-view="suppliers"><span class="nav-icon">♧</span>Поставщики</button>
+        <button class="nav-item" type="button" data-view="analytics"><span class="nav-icon">⌁</span>Аналитика</button>
+      </nav>
+      <div class="secondary-nav-heading">МОЯ КОМПАНИЯ</div>
+      <nav class="sidebar-nav" aria-label="Разделы компании">
+        <button class="nav-item" type="button" data-view="company-profile"><span class="nav-icon">▣</span>Профиль компании</button>
+        <button class="nav-item" type="button" data-view="users"><span class="nav-icon">♙</span>Пользователи</button>
+        <button class="nav-item" type="button" data-view="settings"><span class="nav-icon">⚙</span>Настройки</button>
+      </nav>
+      <div class="secondary-nav-heading">AI</div>
+      <nav class="sidebar-nav" aria-label="Инструменты искусственного интеллекта">
+        <button class="nav-item" type="button" data-view="ai-assistant"><span class="nav-icon">✧</span>FARMOISH AI</button>
+      </nav>
+      <div class="secondary-nav-heading">ПОМОЩЬ</div>
+      <nav class="sidebar-nav" aria-label="Помощь">
+        <button class="nav-item" type="button" data-view="support"><span class="nav-icon">♡</span>Поддержка</button>
+      </nav>
+      <div class="sidebar-spacer"></div>
+      <div class="profile"><div class="avatar">ПП</div><div><div class="profile-name">Профиль компании</div><div class="profile-role">Покупатель · Душанбе</div></div><button class="profile-menu" aria-label="Меню профиля">⌄</button></div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div><h1 class="page-title" id="page-title">Обзор</h1><div class="page-subtitle" id="page-subtitle">Сводка закупок и активности PHARMOISH TJ</div></div>
+        <div class="top-actions"><button class="icon-button" type="button" aria-label="Поиск" id="top-search">⌕</button><button class="icon-button" type="button" aria-label="Уведомления" id="notifications">♧<span class="notification-dot"></span></button><button class="primary-button" type="button" data-open-form>＋ Новая заявка</button></div>
+      </header>
+
+      <section class="view active" id="view-dashboard" data-title="Обзор" data-subtitle="Сводка закупок и активности PHARMOISH TJ">
+        <div class="dashboard-view">
+          <div class="dashboard-intro"><div><h2>Обзор закупок</h2><p>Ключевые показатели, сроки и активность поставщиков в одном месте.</p></div><span class="demo-badge">Часть показателей — mock-данные</span></div>
+          <section class="dashboard-stats" id="dashboard-stats" aria-label="Основные показатели закупок"></section>
+
+          <div class="dashboard-columns">
+            <div class="dashboard-stack">
+              <section class="dashboard-panel">
+                <div class="dashboard-panel-heading"><div><h3>Объём закупок</h3><p>Сумма закупок по выбранному периоду · TJS</p></div><div class="period-tabs" role="group" aria-label="Период графика"><button type="button" class="active" data-chart-period="month" aria-pressed="true">Месяц</button><button type="button" data-chart-period="quarter" aria-pressed="false">Квартал</button><button type="button" data-chart-period="year" aria-pressed="false">Год</button></div></div>
+                <div class="chart-summary"><span class="chart-total" id="chart-total">0</span><span class="chart-currency">TJS · демонстрационные данные</span></div>
+                <div class="procurement-chart" id="procurement-chart" role="img" aria-label="Демонстрационный объём закупок по месяцам"></div>
+                <div class="dashboard-amount-note">Mock-данные для примера интерфейса; суммы не являются фактической финансовой отчётностью.</div>
+              </section>
+              <section class="dashboard-panel"><div class="dashboard-panel-heading"><div><h3>Последние закупки</h3><p>Недавно опубликованные запросы</p></div><button class="dashboard-link" type="button" data-go-view="find">Посмотреть все закупки →</button></div><div class="procurement-table-wrap"><table class="procurement-table"><thead><tr><th>ЗАКУПКА</th><th>КАТЕГОРИЯ</th><th>СУММА</th><th>ПРЕДЛОЖЕНИЯ</th><th>ДАТА ОКОНЧАНИЯ</th><th>СТАТУС</th></tr></thead><tbody id="dashboard-procurements"></tbody></table></div><div class="dashboard-amount-note">Примеры закупок — mock-данные. Реальные записи появятся после подключения API.</div></section>
+            </div>
+            <div class="dashboard-stack">
+              <section class="dashboard-panel"><div class="dashboard-panel-heading"><div><h3>Требует внимания</h3><p>Важные события по закупкам</p></div></div><div class="attention-list" id="dashboard-attention"></div></section>
+              <section class="dashboard-panel"><div class="dashboard-panel-heading"><div><h3>Рекомендованные поставщики</h3><p>Примеры компаний · mock-каталог</p></div><button class="dashboard-link" type="button" data-go-view="suppliers">Все поставщики →</button></div><div class="supplier-grid" id="dashboard-suppliers"></div></section>
+            </div>
+          </div>
+          <section class="ai-dashboard-card"><div class="ai-dashboard-mark" aria-hidden="true">✧</div><div class="ai-dashboard-copy"><strong>Нужна помощь с закупкой?</strong><span>FARMOISH AI подскажет по поиску поставщиков, заявкам и предложениям.</span></div><div class="ai-dashboard-actions"><button class="ai-prompt-chip" type="button" data-ai-prompt="Найди подходящих поставщиков">Найди подходящих поставщиков</button><button class="ai-prompt-chip" type="button" data-ai-prompt="Какие закупки сейчас открыты?">Открытые закупки</button><button class="ai-prompt-chip" type="button" data-ai-prompt="Проанализируй мои закупки">Анализ закупок</button><button class="ai-prompt-chip" type="button" data-ai-prompt="Где можно снизить расходы?">Снизить расходы</button><button class="primary-button" type="button" data-go-view="ai-assistant">✨ Спросить FARMOISH AI</button></div></section>
+        </div>
+      </section>
+
+      <section class="view" id="view-find" data-title="Найти заявки" data-subtitle="Просматривайте открытые запросы покупателей и открывайте подробности">
+        <div class="panel"><div class="section-toolbar"><div class="panel-title">Открытые заявки поставщиков</div><input class="search" id="find-search" type="search" placeholder="Поиск по названию, категории или городу"></div><div class="table-scroll"><table class="requests-table"><thead><tr><th>ЗАЯВКА</th><th>ГОРОД</th><th>КАТЕГОРИЯ</th><th>СТАТУС</th><th></th></tr></thead><tbody id="find-table"></tbody></table></div><div class="notice">Список содержит примеры для демонстрации. Нажмите на название или «Подробнее», чтобы открыть заявку.</div></div>
+      </section>
+
+      <section class="view" id="view-quotes" data-title="Мои заявки" data-subtitle="Все созданные вами заявки доступны здесь и сохраняются в этом браузере">
+        <div class="panel"><div class="section-toolbar"><div class="panel-title">Мои заявки и запросы</div><input class="search" id="quotes-search" type="search" placeholder="Поиск по моим заявкам"></div><div class="table-scroll"><table class="requests-table"><thead><tr><th>ЗАЯВКА</th><th>КАТЕГОРИЯ</th><th>ГОРОД</th><th>ДАТА</th><th>СТАТУС</th><th></th></tr></thead><tbody id="quotes-table"></tbody></table></div><div class="empty-inline" id="quotes-empty" hidden>Заявок пока нет. Нажмите «Новая заявка», чтобы создать первую.</div></div>
+      </section>
+
+      <section class="view" id="view-suppliers" data-title="Поставщики" data-subtitle="Примеры компаний, с которыми можно связаться по коммерческим условиям">
+        <div class="panel"><div class="section-toolbar"><div class="panel-title">Каталог поставщиков</div><input class="search" id="supplier-search" type="search" placeholder="Поиск компании или направления"></div><div class="supplier-list" id="supplier-list"></div></div>
+      </section>
+
+      <section class="view" id="view-analytics" data-title="Аналитика" data-subtitle="Обзор активности кабинета — демонстрационные данные">
+        <div class="analytics-cards"><div class="metric"><div class="metric-label">Всего моих заявок</div><div class="metric-value" id="metric-requests">0</div><div class="metric-foot">Сохранены в этом браузере</div></div><div class="metric"><div class="metric-label">Примерные открытые запросы</div><div class="metric-value">6</div><div class="metric-foot">Демо-контент</div></div><div class="metric"><div class="metric-label">Поставщики в каталоге</div><div class="metric-value">4</div><div class="metric-foot">Демо-контент</div></div></div>
+        <div class="panel"><div class="panel-heading"><h2 class="panel-title">Статистика закупок</h2><span class="status reviewed">Демо-график</span></div><div class="simple-content">График на главной странице показывает пример распределения закупок по категориям. Для реальной аналитики потребуется серверная часть, где будут храниться события и данные сделок.</div></div>
+      </section>
+
+      <section class="view" id="view-settings" data-title="Настройки" data-subtitle="Настройки демонстрационного кабинета">
+        <div class="settings-toolbar">
+          <input class="settings-search" id="settings-search" type="search" placeholder="Поиск настроек, например: валюта, пароль, email" aria-label="Поиск по настройкам">
+          <span class="status reviewed">Режим администратора · прототип</span>
+        </div>
+        <div class="settings-layout">
+          <nav class="settings-menu" id="settings-menu" aria-label="Категории настроек"></nav>
+          <div class="settings-content">
+            <div id="settings-permission" class="settings-permission" hidden>Недостаточно прав для редактирования административных настроек. В реальной системе права должны проверяться сервером.</div>
+            <div id="settings-panel"></div>
+            <section class="settings-card" id="audit-card">
+              <div class="panel-heading"><h2 class="settings-card-title" style="margin:0">Журнал изменений настроек</h2><span class="setting-help">Последние 50 событий · локальная история</span></div>
+              <div class="audit-list" id="settings-audit"></div>
+            </section>
+            <div class="settings-actions">
+              <div class="settings-actions-left"><span class="settings-save-state" id="settings-save-state">Все изменения сохранены</span><button class="danger-button" type="button" id="settings-reset">Восстановить настройки по умолчанию</button></div>
+              <div class="settings-actions-right"><button class="secondary-button" type="button" id="settings-discard">Отменить изменения</button><button class="primary-button" type="button" id="settings-save">Сохранить изменения</button></div>
+            </div>
+            <div class="notice">Настройки этого прототипа сохраняются только в текущем браузере. Секреты интеграций здесь не запрашиваются и не хранятся. Для production нужны серверная авторизация, PostgreSQL и журнал аудита на backend.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-ai-assistant" data-title="FARMOISH AI" data-subtitle="ИИ-помощник PHARMOISH TJ по закупкам, поставщикам и работе платформы">
+        <div class="ai-page">
+          <div class="ai-heading"><div><h2>FARMOISH AI</h2><p>Умный помощник PHARMOISH TJ: помогает составлять закупочные заявки, находить поставщиков и готовить коммерческие предложения.</p></div></div>
+          <section class="ai-chat" aria-label="Чат с FARMOISH AI">
+            <header class="ai-chat-top"><div class="ai-avatar" aria-hidden="true">✦</div><div><div class="ai-agent-name">FARMOISH AI <span style="font-weight:500;opacity:.7">· помощник PHARMOISH TJ</span></div><div class="ai-agent-status"><span class="ai-status-dot" id="ai-status-dot"></span><span id="ai-status-text">Проверяю доступность сервиса</span></div></div></header>
+            <div class="ai-messages" id="ai-messages" aria-live="polite" aria-relevant="additions text">
+              <article class="ai-message ai-welcome"><div class="ai-message-avatar" aria-hidden="true">AI</div><div class="ai-bubble">Здравствуйте! Я FARMOISH AI — интеллектуальный помощник PHARMOISH TJ.<br><br>Я помогу вам ориентироваться на платформе, находить поставщиков, разбираться в закупках, создавать заявки и получать ответы на вопросы о работе сервиса.<br><br>Чем могу вам помочь?</div></article>
+              <div class="ai-quick" id="ai-quick-actions">
+                <button type="button">Как создать закупочную заявку?</button><button type="button">Как найти поставщика?</button><button type="button">Как отправить коммерческое предложение?</button><button type="button">Как работает платформа?</button><button type="button">Как зарегистрировать компанию?</button>
+              </div>
+            </div>
+            <div class="ai-composer-wrap"><form class="ai-composer" id="ai-form"><textarea id="ai-input" rows="1" maxlength="4000" placeholder="Напишите сообщение…" aria-label="Сообщение для ИИ-ассистента"></textarea><button class="ai-send" id="ai-send" type="submit" aria-label="Отправить сообщение">↑</button></form><div class="ai-caption">Enter — отправить · Shift+Enter — новая строка · Не отправляйте пароли или конфиденциальные данные.</div></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="view-support" data-title="Поддержка" data-subtitle="Помощь по работе с прототипом">
+        <div class="panel"><h2 class="panel-title">Как посмотреть заявку?</h2><p class="simple-content">Откройте раздел «Найти заявки» или «Мои заявки», затем нажмите на название заявки либо кнопку «Подробнее». Новую заявку можно создать кнопкой в верхней части экрана — после сохранения она появится в «Мои заявки» и останется там после перезагрузки страницы.</p></div>
+      </section>
+
+      <section class="view" id="view-company-profile" data-title="Профиль компании" data-subtitle="Информация о вашей организации">
+        <div class="panel"><h2 class="panel-title">Профиль компании</h2><p class="simple-content">Профиль организации пока работает как демонстрационная страница. Подключите проверенные данные компании через сервер, чтобы показывать их здесь.</p></div>
+      </section>
+      <section class="view" id="view-users" data-title="Пользователи" data-subtitle="Участники рабочей организации">
+        <div class="panel"><h2 class="panel-title">Пользователи компании</h2><p class="simple-content">Управление пользователями организации потребует серверной авторизации и ролевой модели. Сейчас список пользователей не подключён.</p></div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="request-dialog" aria-labelledby="form-title"><div class="dialog-inner"><div class="dialog-heading"><div><h2 id="form-title">Новая заявка на закупку</h2><p>Заполните основные данные. После сохранения заявка появится в разделе «Мои заявки».</p></div><button class="close-button" type="button" data-close-dialog aria-label="Закрыть">×</button></div><form id="request-form"><div class="form-grid"><div class="field full"><label for="request-title">Что нужно закупить? *</label><input id="request-title" name="title" placeholder="Например, промышленные насосы" required maxlength="120"></div><div class="field"><label for="request-category">Категория *</label><select id="request-category" name="category" required><option value="">Выберите категорию</option><option>Оборудование</option><option>Строительство</option><option>Материалы</option><option>Услуги</option><option>ИТ и связь</option><option>Другое</option></select></div><div class="field"><label for="request-city">Город *</label><input id="request-city" name="city" placeholder="Душанбе" required maxlength="60"></div><div class="field"><label for="request-quantity">Количество / объём</label><input id="request-quantity" name="quantity" placeholder="Например, 10 единиц" maxlength="80"></div><div class="field"><label for="request-budget">Бюджет</label><input id="request-budget" name="budget" placeholder="Например, по запросу" maxlength="60"></div><div class="field"><label for="request-deadline">Срок предложений</label><input id="request-deadline" name="deadline" type="date"></div><div class="field full"><label for="request-description">Описание и требования</label><textarea id="request-description" name="description" placeholder="Характеристики, сроки поставки, условия и другие детали" maxlength="1500"></textarea></div></div><div class="form-footer"><span class="form-hint">Сохраняется в этом браузере<br>и на этом устройстве.</span><button class="primary-button" type="submit">Сохранить заявку →</button></div></form></div></dialog>
+
+  <dialog id="details-dialog" aria-labelledby="details-title"><div class="dialog-inner"><div class="dialog-heading"><div><h2 id="details-title">Заявка</h2><p id="details-subtitle"></p></div><button class="close-button" type="button" data-close-details aria-label="Закрыть">×</button></div><div id="details-content"></div><div class="form-footer"><span class="form-hint" id="details-note"></span><button class="primary-button" type="button" data-close-details>Понятно</button></div></div></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const STORAGE_KEY = 'tenderTJ.requests.v1';
+    const DASHBOARD_DATA_SOURCE = 'mock';
+    const dashboardMock = {
+      stats: { activeProcurements: 12, myRequests: 8, suppliers: 24, totalTjs: 385000 },
+      chart: {
+        month: { labels: ['Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь'], values: [148000, 172000, 135000, 214000, 188000, 246000] },
+        quarter: { labels: ['I кв.', 'II кв.', 'III кв.', 'IV кв.'], values: [390000, 465000, 521000, 246000] },
+        year: { labels: ['2023', '2024', '2025', '2026'], values: [910000, 1240000, 1590000, 1622000] }
+      },
+      procurements: [
+        { id: 'PH-24018', title: 'Промышленные насосы для производственной линии', category: 'Оборудование', amount: 125000, offers: 5, deadline: '2026-11-20', status: 'Открыта' },
+        { id: 'PH-24017', title: 'Поставка цемента для строительного объекта', category: 'Строительство', amount: 68000, offers: 3, deadline: '2026-11-18', status: 'На рассмотрении' },
+        { id: 'PH-24016', title: 'Техническое обслуживание вентиляции', category: 'Услуги', amount: 42000, offers: 4, deadline: '2026-11-14', status: 'Завершена' },
+        { id: 'PH-24015', title: 'Кабельная продукция и электроматериалы', category: 'Материалы', amount: 89500, offers: 2, deadline: '2026-11-12', status: 'Отменена' }
+      ],
+      attention: [
+        { key: 'closing', title: 'Закупки скоро заканчиваются', hint: 'Открытые запросы со сроком до 3 дней', count: 3, color: 'red', view: 'find' },
+        { key: 'decisions', title: 'Заявки ожидают решения', hint: 'Нужна проверка статуса ваших заявок', count: 2, color: 'orange', view: 'quotes' },
+        { key: 'offers', title: 'Предложения требуют рассмотрения', hint: 'Новые ответы от поставщиков', count: 5, color: 'yellow', view: 'quotes' },
+        { key: 'completed', title: 'Завершённые закупки', hint: 'Закупки, закрытые за этот период', count: 4, color: 'green', view: 'find' }
+      ],
+      suppliers: [
+        { name: 'Global Manufacturing Co.', sector: 'Промышленное оборудование', tags: ['Насосы', 'Точная механика'], location: 'Душанбе', rating: '4,8', reviews: 89, initials: 'GM' },
+        { name: 'ТаджикСтрой Снабжение', sector: 'Строительство и материалы', tags: ['Цемент', 'Смеси'], location: 'Худжанд', rating: '4,7', reviews: 54, initials: 'ТС' },
+        { name: 'TechFlow Solutions', sector: 'Инженерные системы', tags: ['Вентиляция', 'Сервис'], location: 'Душанбе', rating: '4,9', reviews: 37, initials: 'TF' }
+      ]
+    };
+    const demoRequests = [
+      { id: 'DEMO-2048', title: 'Промышленные насосы для производственной линии', category: 'Оборудование', city: 'Душанбе', quantity: '10 единиц', budget: 'По запросу', deadline: '2026-11-30', description: 'Насосное оборудование для производства. Просим указать технические характеристики, наличие гарантии и условия доставки.', status: 'Ожидает предложений', demo: true, createdAt: '2026-11-12' },
+      { id: 'DEMO-2047', title: 'Поставка цемента для строительного объекта', category: 'Строительство', city: 'Худжанд', quantity: 'Уточняется', budget: 'По запросу', deadline: '2026-11-25', description: 'Нужны сведения о марке, доступном объёме и графике поставок.', status: 'На рассмотрении', demo: true, createdAt: '2026-11-10' },
+      { id: 'DEMO-2046', title: 'Техническое обслуживание систем вентиляции', category: 'Услуги', city: 'Душанбе', quantity: 'Плановое обслуживание', budget: 'По запросу', deadline: '2026-12-01', description: 'Требуется описать состав работ, сроки выезда и гарантию на выполненные работы.', status: 'Одобрена', demo: true, createdAt: '2026-11-08' },
+      { id: 'DEMO-2045', title: 'Кабельная продукция и электротехнические материалы', category: 'Материалы', city: 'Согдийская область', quantity: 'По спецификации', budget: 'По запросу', deadline: '2026-11-28', description: 'Необходимо приложить сертификаты и указать сроки поставки.', status: 'Ожидает предложений', demo: true, createdAt: '2026-11-07' },
+      { id: 'DEMO-2044', title: 'Резервный генератор для коммерческого объекта', category: 'Оборудование', city: 'Куляб', quantity: '1 комплект', budget: 'По запросу', deadline: '2026-12-05', description: 'Рассматриваются предложения с доставкой, монтажом и гарантийным обслуживанием.', status: 'На рассмотрении', demo: true, createdAt: '2026-11-05' },
+      { id: 'DEMO-2043', title: 'Сухие строительные смеси для отделочных работ', category: 'Строительство', city: 'Душанбе', quantity: 'Регулярные поставки', budget: 'По запросу', deadline: '2026-12-10', description: 'Просим описать фасовку, наличие и условия регулярной доставки.', status: 'Ожидает предложений', demo: true, createdAt: '2026-11-03' }
+    ];
+    const suppliers = [
+      { name: 'Global Manufacturing Co.', sector: 'Промышленное оборудование', tags: ['Насосы', 'Точная механика'], location: 'Душанбе', rating: '4,8', initials: 'GM' },
+      { name: 'ТаджикСтрой Снабжение', sector: 'Строительство и материалы', tags: ['Цемент', 'Смеси'], location: 'Худжанд', rating: '4,7', initials: 'ТС' },
+      { name: 'TechFlow Solutions', sector: 'ИТ и инженерные системы', tags: ['Вентиляция', 'Сервис'], location: 'Душанбе', rating: '4,9', initials: 'TF' },
+      { name: 'EcoLogistics Partners', sector: 'Логистика и доставка', tags: ['Доставка', 'Склад'], location: 'Душанбе', rating: '4,6', initials: 'EP' }
+    ];
+    const pageCopy = {
+      dashboard: ['Обзор', 'Сводка закупок и активности PHARMOISH TJ'],
+      find: ['Найти закупки', 'Просматривайте открытые запросы покупателей и открывайте подробности'],
+      quotes: ['Мои заявки', 'Все созданные вами заявки доступны здесь и сохраняются в этом браузере'],
+      suppliers: ['Поставщики', 'Примеры компаний, с которыми можно связаться по коммерческим условиям'],
+      analytics: ['Аналитика', 'Обзор активности кабинета — демонстрационные данные'],
+      settings: ['Настройки', 'Настройки демонстрационного кабинета'],
+      'ai-assistant': ['FARMOISH AI', 'ИИ-помощник PHARMOISH TJ по закупкам, поставщикам и работе платформы'],
+      'company-profile': ['Профиль компании', 'Информация о вашей организации'],
+      users: ['Пользователи', 'Участники рабочей организации'],
+      support: ['Поддержка', 'Помощь по работе с прототипом']
+    };
+    const SETTINGS_KEY = 'taminot.adminSettings.v1';
+    const SETTINGS_AUDIT_KEY = 'taminot.settingsAudit.v1';
+    const settingField = (key, label, type, value, help = '', options = [], extra = {}) => ({ key, label, type, value, help, options, ...extra });
+    const settingCategories = [
+      { id: 'general', label: 'Общие настройки', icon: '⚙', description: 'Название платформы, владелец, контактные данные и региональные параметры.', groups: [
+        { title: 'Платформа и владелец', fields: [
+          settingField('platform.name', 'Название платформы', 'text', 'PHARMOISH TJ', 'Название, показываемое пользователям.'),
+          settingField('platform.logoUrl', 'URL логотипа', 'url', '', 'В production логотип лучше загружать через защищённое хранилище.'),
+          settingField('platform.description', 'Краткое описание', 'textarea', 'B2B-платформа для закупок и поиска поставщиков в Таджикистане.'),
+          settingField('owner.name', 'Компания-владелец', 'text', 'PHARMOISH TJ'),
+          settingField('owner.email', 'Контактный email', 'email', ''),
+          settingField('owner.phone', 'Телефон', 'tel', ''),
+          settingField('owner.address', 'Адрес', 'text', '', '', [], { full: true }),
+          settingField('region.country', 'Страна', 'select', 'Таджикистан', '', ['Таджикистан', 'Другая']),
+          settingField('region.timezone', 'Часовой пояс', 'select', 'Asia/Dushanbe', '', ['Asia/Dushanbe', 'UTC', 'Europe/Moscow'])
+        ] }
+      ] },
+      { id: 'localization', label: 'Языки и локализация', icon: '文', description: 'Язык по умолчанию, переводы, формат времени, чисел и валют.', groups: [
+        { title: 'Языки сайта', fields: [
+          settingField('locale.defaultLanguage', 'Язык по умолчанию', 'select', 'Русский', '', ['Русский', 'Тоҷикӣ', 'English']),
+          settingField('locale.languages', 'Доступные языки', 'list', ['Русский', 'Тоҷикӣ', 'English'], 'Один язык на строку.'),
+          settingField('locale.translationWorkflow', 'Статус переводов', 'select', 'Переводы управляются отдельно', '', ['Переводы управляются отдельно', 'Русский — готов', 'Нужна локализация'])
+        ] },
+        { title: 'Форматы', fields: [
+          settingField('locale.dateFormat', 'Формат даты', 'select', 'DD.MM.YYYY', '', ['DD.MM.YYYY', 'YYYY-MM-DD', 'MM/DD/YYYY']),
+          settingField('locale.timeFormat', 'Формат времени', 'select', '24 часа', '', ['24 часа', '12 часов']),
+          settingField('locale.numberFormat', 'Формат чисел', 'select', '1 234,56', '', ['1 234,56', '1,234.56']),
+          settingField('locale.currencyFormat', 'Основная денежная единица', 'select', 'TJS — сомони', '', ['TJS — сомони', 'USD — доллар США', 'EUR — евро'])
+        ] }
+      ] },
+      { id: 'users', label: 'Пользователи и доступ', icon: '♙', description: 'Регистрация, проверка аккаунтов, лимиты, роли и действия с пользователями.', groups: [
+        { title: 'Регистрация и активация', fields: [
+          settingField('users.registrationEnabled', 'Разрешить регистрацию', 'toggle', true),
+          settingField('users.buyerRegistration', 'Регистрация покупателей', 'toggle', true),
+          settingField('users.supplierRegistration', 'Регистрация поставщиков', 'toggle', true),
+          settingField('users.emailVerification', 'Подтверждение электронной почты', 'toggle', true),
+          settingField('users.phoneVerification', 'Подтверждение телефона', 'toggle', false),
+          settingField('users.manualCompanyReview', 'Ручная проверка новых компаний', 'toggle', true),
+          settingField('users.autoActivation', 'Автоматическая активация аккаунта', 'toggle', false),
+          settingField('users.accountLimit', 'Лимит аккаунтов на компанию', 'number', 10, 'Значение от 1 до 500.', [], { min: 1, max: 500 })
+        ] },
+        { title: 'Роли и модерация', fields: [
+          settingField('users.roles', 'Роли системы', 'list', ['Администратор', 'Менеджер закупок', 'Покупатель', 'Поставщик', 'Модератор'], 'Редактирование справочника ролей в прототипе; реальные права задаются на сервере.', [], { full: true }),
+          settingField('users.blockingEnabled', 'Разрешить блокировку пользователей', 'toggle', true),
+          settingField('users.blockedUserPolicy', 'Поведение заблокированного аккаунта', 'select', 'Запрет входа и действий', '', ['Запрет входа и действий', 'Только запрет новых заявок'])
+        ] }
+      ] },
+      { id: 'companies', label: 'Компании и проверка', icon: '▣', description: 'Верификация организаций, документы и ограничения для непроверенных поставщиков.', groups: [
+        { title: 'Проверка организаций', fields: [
+          settingField('companies.registrationCheck', 'Проверять регистрационные данные', 'toggle', true),
+          settingField('companies.supplierVerification', 'Проверять поставщиков', 'toggle', true),
+          settingField('companies.reverification', 'Разрешить повторную проверку', 'toggle', true),
+          settingField('companies.verifiedBadge', 'Показывать значок «Проверенная компания»', 'toggle', true),
+          settingField('companies.requiredDocuments', 'Обязательные документы', 'list', ['Свидетельство о регистрации', 'ИНН / налоговый номер', 'Подтверждение банковских реквизитов'], 'Добавьте документы, которые компания должна предоставить.', [], { full: true }),
+          settingField('companies.unverifiedRestrictions', 'Ограничения непроверенных поставщиков', 'select', 'Не могут отправлять предложения', '', ['Не могут отправлять предложения', 'Могут отправлять с предупреждением', 'Без ограничений'])
+        ] }
+      ] },
+      { id: 'procurement', label: 'Закупки и тендеры', icon: '▤', description: 'Публикации, сроки, модерация, статусы и вложения к закупкам.', groups: [
+        { title: 'Публикация заявок', fields: [
+          settingField('procurement.types', 'Разрешённые типы закупок', 'list', ['Запрос коммерческих предложений', 'Прямая коммерческая закупка', 'Конкурс поставщиков'], 'B2G-процедуры нельзя вводить без юридической проверки.', [], { full: true }),
+          settingField('procurement.moderation', 'Модерировать новые заявки', 'toggle', true),
+          settingField('procurement.maxDurationDays', 'Максимальный срок размещения (дней)', 'number', 90, '', [], { min: 1, max: 365 }),
+          settingField('procurement.minProposalDays', 'Минимальный срок подачи предложений (дней)', 'number', 3, '', [], { min: 1, max: 90 }),
+          settingField('procurement.editEnabled', 'Разрешить редактирование опубликованных заявок', 'toggle', true),
+          settingField('procurement.cancelEnabled', 'Разрешить отмену закупок', 'toggle', true),
+          settingField('procurement.autoClose', 'Автоматически закрывать просроченные заявки', 'toggle', true),
+          settingField('procurement.maxOffers', 'Максимум предложений на заявку', 'number', 100, 'От 1 до 10 000.', [], { min: 1, max: 10000 }),
+          settingField('procurement.maxAttachmentMb', 'Максимальный размер вложения (МБ)', 'number', 20, '', [], { min: 1, max: 500 }),
+          settingField('procurement.statuses', 'Статусы закупок', 'list', ['Черновик', 'На модерации', 'Открыта', 'На оценке', 'Завершена', 'Отменена'], '', [], { full: true })
+        ] }
+      ] },
+      { id: 'proposals', label: 'Коммерческие предложения', icon: '⇄', description: 'Правила отправки, редактирования, сравнения и уведомлений по предложениям.', groups: [
+        { title: 'Правила предложений', fields: [
+          settingField('proposals.enabled', 'Разрешить отправку предложений', 'toggle', true),
+          settingField('proposals.limitPerSupplier', 'Предложений от одного поставщика на заявку', 'number', 1, '', [], { min: 1, max: 100 }),
+          settingField('proposals.validityDays', 'Срок действия предложения (дней)', 'number', 30, '', [], { min: 1, max: 365 }),
+          settingField('proposals.editEnabled', 'Разрешить изменение отправленного предложения', 'toggle', true),
+          settingField('proposals.withdrawEnabled', 'Разрешить отзыв предложения', 'toggle', true),
+          settingField('proposals.priceComparison', 'Показывать сравнение цен покупателю', 'toggle', true),
+          settingField('proposals.notifyBuyer', 'Уведомлять покупателя о новых предложениях', 'toggle', true),
+          settingField('proposals.statuses', 'Статусы предложений', 'list', ['Черновик', 'Отправлено', 'На рассмотрении', 'Принято', 'Отклонено', 'Отозвано'], '', [], { full: true })
+        ] }
+      ] },
+      { id: 'finance', label: 'Финансы и тарифы', icon: '◉', description: 'Валюта, модель комиссии, тарифы, налоги и дополнительные услуги. Платежи не подключены.', groups: [
+        { title: 'Комиссия и тарифы', fields: [
+          settingField('finance.currency', 'Основная валюта', 'select', 'TJS', '', ['TJS', 'USD', 'EUR']),
+          settingField('finance.commissionEnabled', 'Включить расчёт комиссии платформы', 'toggle', false, 'Это только параметр модели — списание денег не выполняется.'),
+          settingField('finance.commissionPercent', 'Комиссия платформы (%)', 'number', 0, 'От 0 до 30%. Не является подключением платежей.', [], { min: 0, max: 30, step: 0.1 }),
+          settingField('finance.buyerPlan', 'Тариф покупателя', 'select', 'Бесплатный', '', ['Бесплатный', 'Платный — конфигурация']),
+          settingField('finance.supplierPlan', 'Тариф поставщика', 'select', 'Бесплатный', '', ['Бесплатный', 'Платный — конфигурация']),
+          settingField('finance.paidServices', 'Платные дополнительные услуги', 'list', ['Продвижение профиля — не подключено', 'Проверка документов — не подключено'], '', [], { full: true })
+        ] },
+        { title: 'Учётные данные', fields: [
+          settingField('finance.taxDetails', 'Налоговые реквизиты', 'info', 'Не сохраняются в браузере', 'Реквизиты относятся к чувствительным данным. Настройте хранение и доступ только на сервере.'),
+          settingField('finance.paymentStatus', 'Платежи и история счетов', 'info', 'Не подключены', 'Не создаём фиктивные операции. Нужны backend, договор с провайдером и проверка требований.'),
+          settingField('finance.refundPolicy', 'Возвраты', 'info', 'Не настроены', 'Возвраты требуют реального платёжного провайдера и утверждённой юридической модели.')
+        ] }
+      ] },
+      { id: 'notifications', label: 'Уведомления', icon: '♧', description: 'Каналы и типы уведомлений. Транспортные провайдеры пока не подключены.', groups: [
+        { title: 'Каналы доставки', fields: [
+          settingField('notifications.emailEnabled', 'Email-уведомления', 'toggle', false),
+          settingField('notifications.smsEnabled', 'SMS-уведомления', 'toggle', false),
+          settingField('notifications.inAppEnabled', 'Внутренние уведомления', 'toggle', true)
+        ] },
+        { title: 'События', fields: [
+          settingField('notifications.newProcurement', 'Новые закупки', 'toggle', true),
+          settingField('notifications.newProposal', 'Новые предложения', 'toggle', true),
+          settingField('notifications.dealStatus', 'Изменение статуса сделки', 'toggle', true),
+          settingField('notifications.registration', 'Регистрация пользователя или компании', 'toggle', true),
+          settingField('notifications.deadline', 'Окончание срока закупки', 'toggle', true),
+          settingField('notifications.templates', 'Шаблоны уведомлений', 'info', 'Управление шаблонами доступно после подключения backend-почты и SMS.')
+        ] }
+      ] },
+      { id: 'security', label: 'Безопасность', icon: '◇', description: 'Политики паролей, сессии, попытки входа и аудит. Реальные меры должны enforced сервером.', groups: [
+        { title: 'Политика доступа', fields: [
+          settingField('security.minPasswordLength', 'Минимальная длина пароля', 'number', 12, 'От 8 до 128 символов.', [], { min: 8, max: 128 }),
+          settingField('security.requireTwoFactor', 'Требовать двухфакторную аутентификацию для администраторов', 'toggle', true),
+          settingField('security.loginAttempts', 'Попыток входа до временной блокировки', 'number', 5, '', [], { min: 3, max: 20 }),
+          settingField('security.sessionMinutes', 'Завершать сессию через (минут)', 'number', 60, '', [], { min: 5, max: 1440 }),
+          settingField('security.suspiciousActivity', 'Отслеживать подозрительную активность', 'toggle', true),
+          settingField('security.sessionManagement', 'Активные сессии и история входов', 'info', 'Требуется серверная авторизация и хранилище сессий.'),
+          settingField('security.adminAudit', 'Журнал действий администраторов', 'info', 'В этом прототипе журналируются только сохранения настроек в браузере.')
+        ] }
+      ] },
+      { id: 'directories', label: 'Категории и справочники', icon: '☷', description: 'Редактируемые списки категорий товаров, услуг, регионов, единиц и типов документов.', groups: [
+        { title: 'Справочники платформы', fields: [
+          settingField('directory.productCategories', 'Категории товаров', 'list', ['Оборудование', 'Строительство', 'Материалы', 'ИТ и связь']),
+          settingField('directory.serviceCategories', 'Категории услуг', 'list', ['Логистика', 'Монтаж и ремонт', 'Консалтинг', 'ИТ-услуги']),
+          settingField('directory.regions', 'Регионы Таджикистана', 'list', ['Душанбе', 'Согдийская область', 'Хатлонская область', 'ГБАО', 'Районы республиканского подчинения']),
+          settingField('directory.units', 'Единицы измерения', 'list', ['шт.', 'кг', 'т', 'м', 'м²', 'услуга']),
+          settingField('directory.currencies', 'Валюты', 'list', ['TJS', 'USD', 'EUR']),
+          settingField('directory.documents', 'Типы документов', 'list', ['Регистрационное свидетельство', 'ИНН', 'Сертификат соответствия', 'Лицензия'])
+        ] }
+      ] },
+      { id: 'seo', label: 'SEO и сайт', icon: '⌕', description: 'Поисковые метаданные, индексация и внешние ссылки.', groups: [
+        { title: 'Поисковая оптимизация', fields: [
+          settingField('seo.title', 'Название сайта для поисковых систем', 'text', 'PHARMOISH TJ — закупки и поставщики'),
+          settingField('seo.description', 'Meta Description', 'textarea', 'B2B-платформа закупок и поиска поставщиков в Таджикистане.', '', [], { full: true }),
+          settingField('seo.keywords', 'Meta Keywords', 'text', 'закупки, поставщики, Таджикистан, B2B', '', [], { full: true }),
+          settingField('seo.faviconUrl', 'URL Favicon', 'url', ''),
+          settingField('seo.ogImageUrl', 'URL Open Graph изображения', 'url', ''),
+          settingField('seo.indexing', 'Разрешить индексацию публичных страниц', 'toggle', true),
+          settingField('seo.sitemap', 'Sitemap и robots.txt', 'info', 'Файлы нужно генерировать и отдавать сервером после подключения backend.'),
+          settingField('seo.socialLinks', 'Ссылки на социальные сети', 'list', [], 'Добавляйте URL по одному.', [], { full: true })
+        ] }
+      ] },
+      { id: 'integrations', label: 'Интеграции', icon: '⛓', description: 'SMTP, SMS, платежи, API и вебхуки. Секреты нельзя вводить или хранить в браузере.', groups: [
+        { title: 'Статус подключений', fields: [
+          settingField('integrations.smtpEnabled', 'Включить SMTP', 'toggle', false),
+          settingField('integrations.smtpHost', 'SMTP host (без пароля)', 'text', ''),
+          settingField('integrations.smsEnabled', 'Включить SMS-провайдера', 'toggle', false),
+          settingField('integrations.smsProvider', 'Название SMS-провайдера', 'text', ''),
+          settingField('integrations.paymentsEnabled', 'Платёжная интеграция', 'toggle', false, 'Оставьте выключенной до проверки провайдера и серверной интеграции.', [], { confirm: true }),
+          settingField('integrations.webhooksEnabled', 'Включить обработку вебхуков', 'toggle', false),
+          settingField('integrations.webhookUrls', 'URL вебхуков и секреты', 'info', 'Настраиваются на сервере', 'URL могут содержать токены. Не храните вебхук-секреты или API-ключи в браузере.'),
+          settingField('integrations.secretPolicy', 'API-ключи и пароли', 'info', 'Секреты не отображаются и не сохраняются в localStorage. Добавьте их в серверный secret manager / переменные окружения.')
+        ] }
+      ] },
+      { id: 'legal', label: 'Юридические документы', icon: '§', description: 'Ссылки и версии политик B2B/B2G. Перед запуском требуется юридическая проверка в Таджикистане.', groups: [
+        { title: 'Документы и согласия', fields: [
+          settingField('legal.termsUrl', 'Пользовательское соглашение', 'url', ''),
+          settingField('legal.privacyUrl', 'Политика конфиденциальности', 'url', ''),
+          settingField('legal.personalDataUrl', 'Обработка персональных данных', 'url', ''),
+          settingField('legal.supplierRulesUrl', 'Правила для поставщиков', 'url', ''),
+          settingField('legal.buyerRulesUrl', 'Правила для покупателей', 'url', ''),
+          settingField('legal.procurementRulesUrl', 'Правила коммерческих закупок B2B', 'url', ''),
+          settingField('legal.consentRequired', 'Требовать согласие на обработку данных', 'toggle', true),
+          settingField('legal.b2gPolicy', 'Правила B2G', 'textarea', 'Государственные закупки должны соответствовать законодательству Республики Таджикистан и применимым официальным процедурам. Платформа не заменяет и не обходит такие процедуры.', 'Не запускать B2G-процессы без проверки юристом.', [], { full: true })
+        ] }
+      ] },
+      { id: 'system', label: 'Система', icon: '⌘', description: 'Техническое обслуживание и статусы. Реальные операции требуют серверных прав и инфраструктуры.', groups: [
+        { title: 'Режим и функции', fields: [
+          settingField('system.maintenance', 'Режим технического обслуживания', 'toggle', false, 'В прототипе не скрывает сайт от посетителей.', [], { confirm: true }),
+          settingField('system.featureOffers', 'Функция коммерческих предложений', 'toggle', true),
+          settingField('system.featureSupplierDirectory', 'Каталог поставщиков', 'toggle', true),
+          settingField('system.temporaryFileRetention', 'Очистка временных файлов (дней)', 'number', 30, 'Параметр конфигурации; удаление выполняет серверная задача.', [], { min: 1, max: 365 }),
+          settingField('system.backups', 'Резервное копирование', 'info', 'Не настроено. Настройте резервное копирование базы и проверку восстановления на сервере.'),
+          settingField('system.databaseStatus', 'Статус базы данных', 'info', 'PostgreSQL не подключён — используется локальное хранилище браузера.'),
+          settingField('system.serverStatus', 'Статус сервера', 'info', 'Серверная часть отсутствует.'),
+          settingField('system.appVersion', 'Версия приложения', 'info', 'HTML-прототип · без сборки'),
+          settingField('system.errorLog', 'Журнал системных ошибок и история обновлений', 'info', 'Доступны после подключения backend и централизованного журналирования.')
+        ] }
+      ] }
+    ];
+    const settingsDefaults = Object.fromEntries(settingCategories.flatMap((category) => category.groups.flatMap((group) => group.fields.filter((field) => field.type !== 'info').map((field) => [field.key, field.value]))));
+    const prototypeRole = window.TAMINOT_SESSION?.role || 'superadmin';
+    const canManageSettings = () => ['admin', 'superadmin'].includes(prototypeRole);
+    const canManageSystemSettings = () => prototypeRole === 'superadmin';
+    // Replace this browser adapter with an authenticated REST/PostgreSQL repository in production.
+    const settingsStorage = {
+      read() {
+        try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch (error) { return {}; }
+      },
+      write(value) {
+        try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(value)); return true; } catch (error) { return false; }
+      }
+    };
+    let activeSettingsCategory = 'general';
+    let savedSettings = loadSettings();
+    let settingsDraft = cloneSettings(savedSettings);
+    let settingsSearchQuery = '';
+    const navItems = [...document.querySelectorAll('.nav-item[data-view]')];
+    const views = [...document.querySelectorAll('.view')];
+    const pageTitle = document.querySelector('#page-title');
+    const pageSubtitle = document.querySelector('#page-subtitle');
+    const toast = document.querySelector('#toast');
+    const formDialog = document.querySelector('#request-dialog');
+    const detailsDialog = document.querySelector('#details-dialog');
+    let toastTimer;
+
+    function escapeHTML(value) {
+      return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+    }
+    function getSavedRequests() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        return Array.isArray(stored) ? stored : [];
+      } catch (error) {
+        return [];
+      }
+    }
+    function saveRequests(requests) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(requests));
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+    function allRequests() { return [...getSavedRequests(), ...demoRequests]; }
+    function statusClass(status) {
+      if (status.includes('Одобрен')) return 'approved';
+      if (status.includes('рассмотр')) return 'reviewed';
+      return 'pending';
+    }
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 3800);
+    }
+    function cloneSettings(value) { return JSON.parse(JSON.stringify(value)); }
+    function loadSettings() {
+      const stored = settingsStorage.read();
+      const current = { ...cloneSettings(settingsDefaults), ...(stored && typeof stored === 'object' && !Array.isArray(stored) ? stored : {}) };
+      let migrated = false;
+      for (const key of ['platform.name', 'owner.name']) {
+        if (current[key] === 'TAMINOT' || current[key] === 'PESHNIHOD TJ' || current[key] === 'Tender TJ') {
+          current[key] = 'PHARMOISH TJ';
+          migrated = true;
+        }
+      }
+      if (typeof current['seo.title'] === 'string' && /^(TAMINOT|PESHNIHOD TJ|Tender TJ)/.test(current['seo.title'])) {
+        current['seo.title'] = current['seo.title'].replace(/^(TAMINOT|PESHNIHOD TJ|Tender TJ)/, 'PHARMOISH TJ');
+        migrated = true;
+      }
+      if (migrated) settingsStorage.write(current);
+      return current;
+    }
+    function loadSettingsAudit() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(SETTINGS_AUDIT_KEY) || '[]');
+        return Array.isArray(stored) ? stored.slice(0, 50) : [];
+      } catch (error) {
+        return [];
+      }
+    }
+    function saveAudit(entry) {
+      try {
+        const audit = [entry, ...loadSettingsAudit()].slice(0, 50);
+        localStorage.setItem(SETTINGS_AUDIT_KEY, JSON.stringify(audit));
+      } catch (error) {
+        // Settings remain usable even when the browser blocks local storage.
+      }
+    }
+    function getSettingField(key) {
+      return settingCategories.flatMap((category) => category.groups.flatMap((group) => group.fields)).find((field) => field.key === key);
+    }
+    function settingsCategoryMatches(category, query) {
+      if (!query) return true;
+      const searchable = `${category.label} ${category.description} ${category.groups.flatMap((group) => [group.title, ...group.fields.map((field) => `${field.label} ${field.help} ${field.key}`)]).join(' ')}`;
+      return searchable.toLocaleLowerCase('ru').includes(query);
+    }
+    function renderSettingsMenu() {
+      const menu = document.querySelector('#settings-menu');
+      const matching = settingCategories.filter((category) => settingsCategoryMatches(category, settingsSearchQuery));
+      if (matching.length && !matching.some((category) => category.id === activeSettingsCategory)) activeSettingsCategory = matching[0].id;
+      menu.innerHTML = matching.map((category) => `<button type="button" class="${category.id === activeSettingsCategory ? 'active' : ''}" data-settings-category="${category.id}" aria-current="${category.id === activeSettingsCategory ? 'page' : 'false'}"><span class="settings-menu-icon" aria-hidden="true">${category.icon}</span>${escapeHTML(category.label)}</button>`).join('') || '<div class="settings-empty">Категории не найдены</div>';
+    }
+    function renderSettingField(field) {
+      const value = settingsDraft[field.key] ?? (field.type === 'list' ? [] : '');
+      const help = field.help ? `<span class="setting-help">${escapeHTML(field.help)}</span>` : '';
+      const className = `setting-field${field.full ? ' full' : ''}`;
+      if (field.type === 'info') return `<div class="${className}"><span class="setting-label-row">${escapeHTML(field.label)}</span><div class="integration-secret-note">${escapeHTML(value || field.value)}</div>${help}</div>`;
+      if (field.type === 'toggle') return `<div class="${className}"><div class="setting-switch-row"><div class="setting-switch-copy"><span class="setting-label-row">${escapeHTML(field.label)}</span>${help}</div><button class="switch" type="button" role="switch" aria-checked="${Boolean(value)}" aria-label="${escapeHTML(field.label)}" data-setting-toggle="${field.key}" ${field.key.startsWith('system.') && !canManageSystemSettings() ? 'disabled' : ''}></button></div></div>`;
+      if (field.type === 'list') {
+        const values = Array.isArray(value) ? value : [];
+        return `<div class="${className}"><span class="setting-label-row">${escapeHTML(field.label)}</span><div class="list-editor" data-list-editor="${field.key}">${values.map((item, index) => `<div class="list-row"><input class="setting-input" type="text" value="${escapeHTML(item)}" data-list-key="${field.key}" data-list-index="${index}" aria-label="${escapeHTML(field.label)} ${index + 1}" maxlength="160"><button class="list-remove" type="button" data-list-remove="${field.key}" data-list-index="${index}" aria-label="Удалить строку">×</button></div>`).join('')}</div><button class="list-add" type="button" data-list-add="${field.key}">＋ Добавить строку</button>${help}</div>`;
+      }
+      if (field.type === 'textarea') return `<label class="${className}"><span class="setting-label-row">${escapeHTML(field.label)}</span><textarea class="setting-textarea" data-setting-key="${field.key}" maxlength="2000" ${field.key.startsWith('system.') && !canManageSystemSettings() ? 'disabled' : ''}>${escapeHTML(value)}</textarea>${help}</label>`;
+      if (field.type === 'select') return `<label class="${className}"><span class="setting-label-row">${escapeHTML(field.label)}</span><select class="setting-select" data-setting-key="${field.key}" ${field.key.startsWith('system.') && !canManageSystemSettings() ? 'disabled' : ''}>${field.options.map((option) => `<option value="${escapeHTML(option)}" ${value === option ? 'selected' : ''}>${escapeHTML(option)}</option>`).join('')}</select>${help}</label>`;
+      const inputType = ['email', 'tel', 'url', 'number'].includes(field.type) ? field.type : 'text';
+      const numberAttributes = field.type === 'number' ? `min="${field.min ?? 0}" max="${field.max ?? 999999}" step="${field.step ?? 1}"` : '';
+      return `<label class="${className}"><span class="setting-label-row">${escapeHTML(field.label)}</span><input class="setting-input" type="${inputType}" value="${escapeHTML(value)}" data-setting-key="${field.key}" ${numberAttributes} maxlength="200" ${field.key.startsWith('system.') && !canManageSystemSettings() ? 'disabled' : ''}>${help}</label>`;
+    }
+    function renderSettingsPanel() {
+      const panel = document.querySelector('#settings-panel');
+      const permissionNotice = document.querySelector('#settings-permission');
+      const permitted = canManageSettings();
+      permissionNotice.hidden = permitted;
+      document.querySelectorAll('#settings-save, #settings-discard, #settings-reset').forEach((button) => { button.disabled = !permitted; });
+      if (!permitted) {
+        panel.innerHTML = '';
+        return;
+      }
+      if (settingsSearchQuery && !settingCategories.some((item) => settingsCategoryMatches(item, settingsSearchQuery))) {
+        panel.innerHTML = '<div class="settings-empty">По вашему запросу настройки не найдены.</div>';
+        return;
+      }
+      const category = settingCategories.find((item) => item.id === activeSettingsCategory);
+      if (!category) {
+        panel.innerHTML = '<div class="settings-empty">Настройки не найдены. Измените поисковый запрос.</div>';
+        return;
+      }
+      const query = settingsSearchQuery;
+      const matchesField = (field) => !query || `${field.label} ${field.help} ${field.key}`.toLocaleLowerCase('ru').includes(query) || `${category.label} ${category.description}`.toLocaleLowerCase('ru').includes(query);
+      const groups = category.groups.map((group) => {
+        const fields = group.fields.filter(matchesField);
+        return fields.length ? `<section class="settings-card"><h3 class="settings-card-title">${escapeHTML(group.title)}</h3><div class="settings-fields">${fields.map(renderSettingField).join('')}</div></section>` : '';
+      }).join('');
+      panel.innerHTML = `<div class="settings-section-heading"><div><h2>${escapeHTML(category.label)}</h2><p>${escapeHTML(category.description)}</p></div></div>${groups || '<div class="settings-empty">В этой категории нет параметров по запросу.</div>'}`;
+    }
+    function renderSettingsAudit() {
+      const audit = loadSettingsAudit();
+      document.querySelector('#settings-audit').innerHTML = audit.length ? audit.map((entry) => `<div class="audit-entry"><span class="audit-date">${escapeHTML(new Intl.DateTimeFormat('ru-RU', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(entry.at)))}</span><span class="audit-change">${escapeHTML(entry.action)} · ${escapeHTML(entry.changes.join(', '))} <span class="setting-help">(${escapeHTML(entry.actor)})</span></span></div>`).join('') : '<div class="settings-empty">Изменений пока нет. После сохранения они появятся здесь.</div>';
+    }
+    function updateSettingsDirtyState() {
+      const changed = Object.keys(settingsDefaults).some((key) => JSON.stringify(settingsDraft[key]) !== JSON.stringify(savedSettings[key]));
+      const state = document.querySelector('#settings-save-state');
+      state.textContent = changed ? 'Есть несохранённые изменения' : 'Все изменения сохранены';
+      state.classList.toggle('unsaved', changed);
+      document.querySelector('#settings-save').disabled = !canManageSettings() || !changed;
+      return changed;
+    }
+    function renderSettings() {
+      renderSettingsMenu();
+      renderSettingsPanel();
+      renderSettingsAudit();
+      updateSettingsDirtyState();
+    }
+    function validateSettings() {
+      for (const category of settingCategories) {
+        for (const group of category.groups) {
+          for (const field of group.fields) {
+            if (field.type === 'info' || field.type === 'toggle' || field.type === 'list') continue;
+            const value = settingsDraft[field.key];
+            if (field.type === 'email' && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return `${field.label}: укажите корректный email.`;
+            if (field.type === 'url' && value) {
+              try { new URL(value); } catch (error) { return `${field.label}: укажите полный URL, например https://example.com.`; }
+            }
+            if (field.type === 'number' && (!Number.isFinite(Number(value)) || Number(value) < field.min || Number(value) > field.max)) return `${field.label}: значение должно быть от ${field.min} до ${field.max}.`;
+          }
+        }
+      }
+      return '';
+    }
+    function persistSettings(action = 'Сохранение настроек') {
+      if (!canManageSettings()) {
+        showToast('Недостаточно прав для изменения настроек.');
+        return false;
+      }
+      const validationError = validateSettings();
+      if (validationError) {
+        showToast(validationError);
+        return false;
+      }
+      const changedKeys = Object.keys(settingsDefaults).filter((key) => JSON.stringify(settingsDraft[key]) !== JSON.stringify(savedSettings[key]));
+      if (!changedKeys.length) {
+        showToast('Изменений для сохранения нет.');
+        return true;
+      }
+      if (changedKeys.some((key) => key.startsWith('system.')) && !canManageSystemSettings()) {
+        showToast('Изменять системные параметры может только суперадминистратор.');
+        return false;
+      }
+      if (!settingsStorage.write(settingsDraft)) {
+        showToast('Не удалось сохранить настройки. Хранилище браузера недоступно или заполнено.');
+        return false;
+      }
+      const labels = changedKeys.map((key) => getSettingField(key)?.label || key);
+      savedSettings = cloneSettings(settingsDraft);
+      saveAudit({ at: new Date().toISOString(), action, changes: labels, actor: prototypeRole });
+      renderSettingsAudit();
+      updateSettingsDirtyState();
+      showToast(`Настройки сохранены. Изменено параметров: ${changedKeys.length}.`);
+      return true;
+    }
+    function discardSettings() {
+      if (updateSettingsDirtyState() && !window.confirm('Отменить все несохранённые изменения?')) return;
+      savedSettings = loadSettings();
+      settingsDraft = cloneSettings(savedSettings);
+      renderSettings();
+      showToast('Несохранённые изменения отменены.');
+    }
+    function resetSettings() {
+      if (!canManageSettings()) return showToast('Недостаточно прав для сброса настроек.');
+      if (!window.confirm('Восстановить значения по умолчанию для всех настроек? Текущие сохранённые значения будут заменены.')) return;
+      settingsDraft = cloneSettings(settingsDefaults);
+      if (persistSettings('Восстановление настроек по умолчанию')) renderSettings();
+    }
+    function openView(name) {
+      if (!pageCopy[name]) return;
+      navItems.forEach((item) => item.classList.toggle('active', item.dataset.view === name));
+      views.forEach((view) => view.classList.toggle('active', view.id === `view-${name}`));
+      pageTitle.textContent = pageCopy[name][0];
+      pageSubtitle.textContent = pageCopy[name][1];
+      history.replaceState(null, '', name === 'ai-assistant' ? '/dashboard/ai-assistant' : `/#${name}`);
+      renderAll();
+      if (name === 'settings') renderSettings();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function showRequestDetails(id) {
+      const request = allRequests().find((item) => item.id === id);
+      if (!request) return;
+      document.querySelector('#details-title').textContent = request.title;
+      document.querySelector('#details-subtitle').textContent = `Заявка ${request.id} · ${request.demo ? 'пример для демонстрации' : 'сохранена в этом браузере'}`;
+      document.querySelector('#details-content').innerHTML = `<div class="detail-grid"><div class="detail-cell"><div class="detail-label">Категория</div><div class="detail-value">${escapeHTML(request.category)}</div></div><div class="detail-cell"><div class="detail-label">Город</div><div class="detail-value">${escapeHTML(request.city)}</div></div><div class="detail-cell"><div class="detail-label">Количество / объём</div><div class="detail-value">${escapeHTML(request.quantity || 'Не указано')}</div></div><div class="detail-cell"><div class="detail-label">Бюджет</div><div class="detail-value">${escapeHTML(request.budget || 'По запросу')}</div></div><div class="detail-cell"><div class="detail-label">Срок предложений</div><div class="detail-value">${escapeHTML(formatDate(request.deadline) || 'Не указан')}</div></div><div class="detail-cell"><div class="detail-label">Статус</div><div class="detail-value">${escapeHTML(request.status)}</div></div></div><div class="detail-description">${escapeHTML(request.description || 'Дополнительное описание не добавлено.')}</div>`;
+      document.querySelector('#details-note').textContent = request.demo ? 'Демонстрационная карточка — взаимодействие с реальным поставщиком не подключено.' : 'Сохранено локально в этом браузере.';
+      detailsDialog.showModal();
+    }
+    function showDashboardProcurement(id) {
+      const item = dashboardMock.procurements.find((procurement) => procurement.id === id);
+      if (!item) return;
+      document.querySelector('#details-title').textContent = item.title;
+      document.querySelector('#details-subtitle').textContent = `Закупка ${item.id} · демонстрационные данные`;
+      document.querySelector('#details-content').innerHTML = `<div class="detail-grid"><div class="detail-cell"><div class="detail-label">Категория</div><div class="detail-value">${escapeHTML(item.category)}</div></div><div class="detail-cell"><div class="detail-label">Сумма</div><div class="detail-value">${escapeHTML(formatTjs(item.amount))}</div></div><div class="detail-cell"><div class="detail-label">Количество предложений</div><div class="detail-value">${item.offers}</div></div><div class="detail-cell"><div class="detail-label">Дата окончания</div><div class="detail-value">${escapeHTML(formatDate(item.deadline))}</div></div><div class="detail-cell"><div class="detail-label">Статус</div><div class="detail-value">${procurementStatus(item.status)}</div></div></div><div class="detail-description">Эта закупка показана как mock-пример. Реальная карточка и предложения поставщиков требуют подключения API.</div>`;
+      document.querySelector('#details-note').textContent = 'Демонстрационные данные · не является реальной закупкой.';
+      detailsDialog.showModal();
+    }
+    function formatDate(dateString) {
+      if (!dateString) return '';
+      const date = new Date(`${dateString}T00:00:00`);
+      return Number.isNaN(date.getTime()) ? dateString : new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' }).format(date);
+    }
+    function formatTjs(amount) {
+      return `${new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(Number(amount) || 0)} TJS`;
+    }
+    function statusBadge(status) { return `<span class="status ${statusClass(status)}">${escapeHTML(status)}</span>`; }
+    function procurementStatus(status) {
+      const state = status === 'Открыта' ? 'open' : status === 'На рассмотрении' ? 'review' : status === 'Завершена' ? 'done' : 'cancelled';
+      return `<span class="procurement-status ${state}">${escapeHTML(status)}</span>`;
+    }
+    function renderDashboardStats() {
+      const stats = dashboardMock.stats;
+      const savedRequestCount = getSavedRequests().length;
+      const cards = [
+        { label: 'Активные закупки', value: stats.activeProcurements, icon: '▤', foot: 'Открытые запросы', view: 'find' },
+        { label: 'Мои заявки', value: savedRequestCount, icon: '▣', foot: 'Сохранённые в этом браузере', view: 'quotes' },
+        { label: 'Поставщики', value: stats.suppliers, icon: '♧', foot: 'В каталоге платформы', view: 'suppliers' },
+        { label: 'Сумма закупок', value: formatTjs(stats.totalTjs), icon: '◉', foot: 'Общий объём · mock', view: 'analytics' }
+      ];
+      document.querySelector('#dashboard-stats').innerHTML = cards.map((card) => `<button class="stat-card" type="button" data-dashboard-view="${card.view}" aria-label="${escapeHTML(card.label)}: ${escapeHTML(card.value)}. Открыть раздел"><span class="stat-card-head"><span>${escapeHTML(card.label)}</span><span class="stat-icon" aria-hidden="true">${card.icon}</span></span><strong class="stat-value">${escapeHTML(card.value)}</strong><span class="stat-foot">${escapeHTML(card.foot)} · открыть →</span></button>`).join('');
+    }
+    function renderProcurementChart(period = 'month') {
+      const dataset = dashboardMock.chart[period] || dashboardMock.chart.month;
+      const chart = document.querySelector('#procurement-chart');
+      const max = Math.max(...dataset.values, 1);
+      const total = dataset.values.reduce((sum, value) => sum + value, 0);
+      document.querySelector('#chart-total').textContent = new Intl.NumberFormat('ru-RU', { notation: 'compact', maximumFractionDigits: 1 }).format(total);
+      chart.setAttribute('aria-label', `Демонстрационный объём закупок ${period === 'month' ? 'по месяцам' : period === 'quarter' ? 'по кварталам' : 'по годам'}`);
+      chart.innerHTML = `<div class="procurement-yaxis"><span>${escapeHTML(new Intl.NumberFormat('ru-RU', { notation: 'compact', maximumFractionDigits: 0 }).format(max))}</span><span>${escapeHTML(new Intl.NumberFormat('ru-RU', { notation: 'compact', maximumFractionDigits: 0 }).format(max * .66))}</span><span>${escapeHTML(new Intl.NumberFormat('ru-RU', { notation: 'compact', maximumFractionDigits: 0 }).format(max * .33))}</span><span>0</span></div><div class="procurement-bars">${dataset.values.map((value, index) => `<div class="procurement-bar-group" title="${escapeHTML(dataset.labels[index])}: ${escapeHTML(formatTjs(value))}"><div class="procurement-bar" style="--bar-height:${Math.max(3, value / max * 100)}%"></div><span class="procurement-bar-label">${escapeHTML(dataset.labels[index])}</span></div>`).join('')}</div>`;
+    }
+    function renderDashboardProcurements() {
+      const rows = dashboardMock.procurements;
+      document.querySelector('#dashboard-procurements').innerHTML = rows.map((item) => `<tr data-dashboard-procurement="${escapeHTML(item.id)}" tabindex="0" role="button" aria-label="Открыть закупку ${escapeHTML(item.title)}"><td><span class="procurement-title">${escapeHTML(item.title)}</span><span class="procurement-id">${escapeHTML(item.id)} · пример</span></td><td>${escapeHTML(item.category)}</td><td>${escapeHTML(formatTjs(item.amount))}</td><td>${item.offers}</td><td>${escapeHTML(formatDate(item.deadline))}</td><td>${procurementStatus(item.status)}</td></tr>`).join('');
+    }
+    function renderDashboardAttention() {
+      document.querySelector('#dashboard-attention').innerHTML = dashboardMock.attention.map((item) => `<button class="attention-item" type="button" data-dashboard-view="${item.view}"><span class="attention-dot ${item.color}" aria-hidden="true"></span><span class="attention-copy"><strong>${escapeHTML(item.title)}</strong><small>${escapeHTML(item.hint)} · пример</small></span><span class="attention-count">${item.count}</span></button>`).join('');
+    }
+    function dashboardSupplierCard(supplier) {
+      return `<article class="supplier-card-dash"><div class="supplier-dash-top"><div class="supplier-logo">${escapeHTML(supplier.initials)}</div><div class="supplier-dash-title"><strong>${escapeHTML(supplier.name)}</strong><span>${escapeHTML(supplier.sector)}</span></div></div><div class="supplier-dash-meta"><span>★ ${escapeHTML(supplier.rating)} · ${supplier.reviews} отзывов</span><span>⌖ ${escapeHTML(supplier.location)}</span></div><div class="supplier-dash-tags">${supplier.tags.map((tag) => `<span class="tag">${escapeHTML(tag)}</span>`).join('')}</div><button class="secondary-button supplier-action" type="button" data-supplier="${escapeHTML(supplier.name)}">Запросить предложение</button></article>`;
+    }
+    function renderDashboardSuppliers() {
+      document.querySelector('#dashboard-suppliers').innerHTML = dashboardMock.suppliers.map(dashboardSupplierCard).join('');
+    }
+    function renderDashboard() {
+      renderDashboardStats();
+      renderProcurementChart(document.querySelector('[data-chart-period].active')?.dataset.chartPeriod || 'month');
+      renderDashboardProcurements();
+      renderDashboardAttention();
+      renderDashboardSuppliers();
+    }
+    function renderQuotes(query = '') {
+      const saved = getSavedRequests();
+      const normalized = query.trim().toLocaleLowerCase('ru');
+      const filtered = saved.filter((request) => `${request.title} ${request.category} ${request.city}`.toLocaleLowerCase('ru').includes(normalized));
+      document.querySelector('#quotes-table').innerHTML = filtered.map((request) => `<tr><td><span class="table-title">${escapeHTML(request.title)}</span><span class="table-muted">${escapeHTML(request.id)}</span></td><td>${escapeHTML(request.category)}</td><td>${escapeHTML(request.city)}</td><td>${escapeHTML(formatDate(request.createdAt))}</td><td>${statusBadge(request.status)}</td><td><button class="table-action" type="button" data-open-request="${escapeHTML(request.id)}">Подробнее</button></td></tr>`).join('');
+      document.querySelector('#quotes-empty').hidden = filtered.length > 0;
+      document.querySelector('#request-count').textContent = String(saved.length);
+      document.querySelector('#metric-requests').textContent = String(saved.length);
+    }
+    function renderFind(query = '') {
+      const normalized = query.trim().toLocaleLowerCase('ru');
+      const list = demoRequests.filter((request) => `${request.title} ${request.category} ${request.city}`.toLocaleLowerCase('ru').includes(normalized));
+      document.querySelector('#find-table').innerHTML = list.map((request) => `<tr><td><span class="table-title">${escapeHTML(request.title)}</span><span class="table-muted">${escapeHTML(request.id)}</span></td><td>${escapeHTML(request.city)}</td><td>${escapeHTML(request.category)}</td><td>${statusBadge(request.status)}</td><td><button class="table-action" type="button" data-open-request="${escapeHTML(request.id)}">Подробнее →</button></td></tr>`).join('') || '<tr><td colspan="5" class="empty-inline">По вашему запросу ничего не найдено</td></tr>';
+    }
+    function supplierCard(supplier) {
+      return `<article class="supplier-card"><div class="supplier-main"><div class="supplier-logo">${escapeHTML(supplier.initials)}</div><div style="min-width:0"><h3>${escapeHTML(supplier.name)}</h3><div class="supplier-sector">${escapeHTML(supplier.sector)}</div></div></div><div class="tags">${supplier.tags.map((tag) => `<span class="tag">${escapeHTML(tag)}</span>`).join('')}</div><div class="supplier-info"><span>⌖ ${escapeHTML(supplier.location)}</span><strong>★ ${escapeHTML(supplier.rating)} · пример</strong></div><div class="supplier-info"><span>Профиль компании</span><span>Демо-каталог</span></div><button class="primary-button quote-button" type="button" data-supplier="${escapeHTML(supplier.name)}">Запросить предложение</button></article>`;
+    }
+    function renderSuppliers(query = '') {
+      const normalized = query.trim().toLocaleLowerCase('ru');
+      const list = suppliers.filter((supplier) => `${supplier.name} ${supplier.sector} ${supplier.tags.join(' ')}`.toLocaleLowerCase('ru').includes(normalized));
+      document.querySelector('#supplier-list').innerHTML = list.map(supplierCard).join('') || '<div class="empty-inline">Поставщики не найдены</div>';
+    }
+    function renderAll() {
+      renderDashboard();
+      renderQuotes(document.querySelector('#quotes-search').value);
+      renderFind(document.querySelector('#find-search').value);
+      renderSuppliers(document.querySelector('#supplier-search').value);
+    }
+
+    navItems.forEach((item) => item.addEventListener('click', () => openView(item.dataset.view)));
+    document.addEventListener('click', (event) => {
+      const viewButton = event.target.closest('[data-go-view]');
+      if (viewButton) openView(viewButton.dataset.goView);
+      const dashboardViewButton = event.target.closest('[data-dashboard-view]');
+      if (dashboardViewButton) openView(dashboardViewButton.dataset.dashboardView);
+      const procurementRow = event.target.closest('[data-dashboard-procurement]');
+      if (procurementRow) showDashboardProcurement(procurementRow.dataset.dashboardProcurement);
+      const requestButton = event.target.closest('[data-open-request]');
+      if (requestButton) showRequestDetails(requestButton.dataset.openRequest);
+      const supplierButton = event.target.closest('[data-supplier]');
+      if (supplierButton) showToast(`Демо-каталог: запрос компании «${supplierButton.dataset.supplier}» пока не отправляется.`);
+    });
+    document.querySelectorAll('[data-open-form]').forEach((button) => button.addEventListener('click', () => formDialog.showModal()));
+    document.querySelector('[data-close-dialog]').addEventListener('click', () => formDialog.close());
+    document.querySelectorAll('[data-close-details]').forEach((button) => button.addEventListener('click', () => detailsDialog.close()));
+    [formDialog, detailsDialog].forEach((dialog) => dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); }));
+    document.querySelector('#request-form').addEventListener('submit', (event) => {
+      event.preventDefault();
+      const formData = new FormData(event.currentTarget);
+      const saved = getSavedRequests();
+      const request = {
+        id: `TJ-${Date.now().toString().slice(-7)}`,
+        title: formData.get('title').trim(),
+        category: formData.get('category'),
+        city: formData.get('city').trim(),
+        quantity: formData.get('quantity').trim(),
+        budget: formData.get('budget').trim() || 'По запросу',
+        deadline: formData.get('deadline'),
+        description: formData.get('description').trim(),
+        status: 'Ожидает предложений',
+        demo: false,
+        createdAt: new Date().toISOString().slice(0, 10)
+      };
+      if (!saveRequests([request, ...saved])) {
+        showToast('Не удалось сохранить заявку. Проверьте настройки хранения браузера или запустите страницу через Live Server.');
+        return;
+      }
+      event.currentTarget.reset();
+      formDialog.close();
+      openView('quotes');
+      showToast('Заявка сохранена. Она доступна в разделе «Мои заявки» и останется после перезагрузки.');
+    });
+    document.querySelector('#quotes-search').addEventListener('input', (event) => renderQuotes(event.target.value));
+    document.querySelector('#find-search').addEventListener('input', (event) => renderFind(event.target.value));
+    document.querySelector('#supplier-search').addEventListener('input', (event) => renderSuppliers(event.target.value));
+    document.querySelector('#top-search').addEventListener('click', () => { openView('find'); document.querySelector('#find-search').focus(); });
+    document.querySelector('#notifications').addEventListener('click', () => showToast('Новых уведомлений пока нет.'));
+    document.querySelector('#settings-menu').addEventListener('click', (event) => {
+      const button = event.target.closest('[data-settings-category]');
+      if (!button) return;
+      activeSettingsCategory = button.dataset.settingsCategory;
+      renderSettingsMenu();
+      renderSettingsPanel();
+    });
+    document.querySelector('#settings-search').addEventListener('input', (event) => {
+      settingsSearchQuery = event.target.value.trim().toLocaleLowerCase('ru');
+      renderSettingsMenu();
+      renderSettingsPanel();
+    });
+    document.querySelector('#settings-panel').addEventListener('click', (event) => {
+      const toggle = event.target.closest('[data-setting-toggle]');
+      if (toggle) {
+        const key = toggle.dataset.settingToggle;
+        const field = getSettingField(key);
+        if (key.startsWith('system.') && !canManageSystemSettings()) return showToast('Изменять системные параметры может только суперадминистратор.');
+        const nextValue = toggle.getAttribute('aria-checked') !== 'true';
+        if (field?.confirm && !window.confirm(`Подтвердите изменение параметра «${field.label}».`)) return;
+        settingsDraft[key] = nextValue;
+        toggle.setAttribute('aria-checked', String(nextValue));
+        updateSettingsDirtyState();
+        return;
+      }
+      const addButton = event.target.closest('[data-list-add]');
+      if (addButton) {
+        const key = addButton.dataset.listAdd;
+        settingsDraft[key] = [...(Array.isArray(settingsDraft[key]) ? settingsDraft[key] : []), ''];
+        renderSettingsPanel();
+        updateSettingsDirtyState();
+        const inputs = document.querySelectorAll(`[data-list-key="${CSS.escape(key)}"]`);
+        inputs[inputs.length - 1]?.focus();
+        return;
+      }
+      const removeButton = event.target.closest('[data-list-remove]');
+      if (removeButton) {
+        const key = removeButton.dataset.listRemove;
+        const index = Number(removeButton.dataset.listIndex);
+        settingsDraft[key] = (Array.isArray(settingsDraft[key]) ? settingsDraft[key] : []).filter((_, itemIndex) => itemIndex !== index);
+        renderSettingsPanel();
+        updateSettingsDirtyState();
+      }
+    });
+    document.querySelector('#settings-panel').addEventListener('input', (event) => {
+      const input = event.target;
+      if (input.matches('[data-setting-key]')) {
+        const field = getSettingField(input.dataset.settingKey);
+        const value = field?.type === 'number' ? (input.value === '' ? '' : Number(input.value)) : input.value;
+        settingsDraft[input.dataset.settingKey] = value;
+        updateSettingsDirtyState();
+      }
+      if (input.matches('[data-list-key]')) {
+        const key = input.dataset.listKey;
+        const index = Number(input.dataset.listIndex);
+        const values = Array.isArray(settingsDraft[key]) ? [...settingsDraft[key]] : [];
+        values[index] = input.value;
+        settingsDraft[key] = values;
+        updateSettingsDirtyState();
+      }
+    });
+    document.querySelector('#settings-panel').addEventListener('change', (event) => {
+      const input = event.target;
+      if (!input.matches('[data-setting-key]')) return;
+      const field = getSettingField(input.dataset.settingKey);
+      if (field?.confirm && input.value !== savedSettings[field.key] && !window.confirm(`Подтвердите изменение параметра «${field.label}».`)) {
+        input.value = savedSettings[field.key];
+        settingsDraft[field.key] = savedSettings[field.key];
+        updateSettingsDirtyState();
+      }
+    });
+    document.querySelector('#settings-save').addEventListener('click', () => {
+      Object.keys(settingsDraft).forEach((key) => {
+        if (Array.isArray(settingsDraft[key])) settingsDraft[key] = settingsDraft[key].map((item) => String(item).trim()).filter(Boolean);
+      });
+      if (persistSettings()) renderSettings();
+    });
+    document.querySelector('#settings-discard').addEventListener('click', discardSettings);
+    document.querySelector('#settings-reset').addEventListener('click', resetSettings);
+    const aiMessages = document.querySelector('#ai-messages');
+    const aiInput = document.querySelector('#ai-input');
+    const aiSend = document.querySelector('#ai-send');
+    const aiStatusDot = document.querySelector('#ai-status-dot');
+    const aiStatusText = document.querySelector('#ai-status-text');
+    const aiConversation = [];
+    let aiAvailable = false;
+    let aiBusy = false;
+    function setAiAvailability(available, message = '') {
+      aiAvailable = available;
+      aiStatusDot.classList.toggle('ready', available);
+      aiStatusText.textContent = available ? 'API-ключ настроен' : (message || 'ИИ временно не настроен');
+    }
+    async function checkAiAvailability() {
+      try {
+        const response = await fetch('/api/ai/health', { headers: { Accept: 'application/json' } });
+        if (!response.ok) throw new Error('Unavailable');
+        const health = await response.json();
+        setAiAvailability(Boolean(health.available), health.configured ? 'Сервер недоступен' : 'Нужен API-ключ');
+      } catch (error) {
+        setAiAvailability(false, 'Сервер недоступен');
+      }
+    }
+    function appendAiMessage(role, text) {
+      const article = document.createElement('article');
+      article.className = `ai-message ${role === 'user' ? 'user' : ''}`;
+      const avatar = document.createElement('div');
+      avatar.className = 'ai-message-avatar';
+      avatar.setAttribute('aria-hidden', 'true');
+      avatar.textContent = role === 'user' ? 'Вы' : 'AI';
+      const bubble = document.createElement('div');
+      bubble.className = 'ai-bubble';
+      bubble.textContent = text;
+      article.append(avatar, bubble);
+      aiMessages.append(article);
+      aiMessages.scrollTop = aiMessages.scrollHeight;
+      return article;
+    }
+    function setAiBusy(busy) {
+      aiBusy = busy;
+      aiSend.disabled = busy;
+      aiInput.disabled = busy;
+      if (busy) aiStatusText.textContent = 'FARMOISH AI готовит ответ…';
+    }
+    async function sendAiMessage(text) {
+      const message = text.trim();
+      if (!message || aiBusy) return;
+      document.querySelector('#ai-quick-actions')?.remove();
+      appendAiMessage('user', message);
+      aiInput.value = '';
+      aiInput.style.height = 'auto';
+      if (!aiAvailable) {
+        appendAiMessage('assistant', 'FARMOISH AI пока не может ответить: сервер не видит AI_API_KEY. Добавьте ключ провайдера в локальный файл .env рядом с server.py и перезапустите сервер. Не вставляйте ключ в это окно чата.');
+        return;
+      }
+      const pending = document.createElement('article');
+      pending.className = 'ai-message';
+      pending.innerHTML = '<div class="ai-message-avatar" aria-hidden="true">AI</div><div class="ai-bubble"><span class="ai-typing">Печатает <i class="ai-typing-dot"></i><i class="ai-typing-dot"></i><i class="ai-typing-dot"></i></span></div>';
+      aiMessages.append(pending);
+      aiMessages.scrollTop = aiMessages.scrollHeight;
+      setAiBusy(true);
+      aiConversation.push({ role: 'user', content: message });
+      try {
+        const response = await fetch('/api/ai/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ messages: aiConversation.slice(-20) })
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          aiStatusText.textContent = payload?.error?.code === 'AI_QUOTA_EXHAUSTED'
+            ? 'Закончилась квота API'
+            : payload?.error?.code === 'AI_RATE_LIMITED'
+              ? 'Слишком много запросов'
+              : 'Ошибка API — подробности в чате';
+          throw new Error(payload?.error?.message || 'ИИ-ассистент временно недоступен. Попробуйте позже.');
+        }
+        if (typeof payload.message !== 'string' || !payload.message.trim()) throw new Error('Не удалось получить ответ. Попробуйте ещё раз.');
+        aiConversation.push({ role: 'assistant', content: payload.message });
+        pending.remove();
+        appendAiMessage('assistant', payload.message);
+        aiStatusText.textContent = 'API-ключ настроен';
+      } catch (error) {
+        pending.remove();
+        aiConversation.pop();
+        appendAiMessage('assistant', error.message || 'Не удалось отправить сообщение. Попробуйте позже.');
+      } finally {
+        setAiBusy(false);
+        aiInput.focus();
+      }
+    }
+    document.querySelector('#ai-form').addEventListener('submit', (event) => {
+      event.preventDefault();
+      sendAiMessage(aiInput.value);
+    });
+    aiInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        document.querySelector('#ai-form').requestSubmit();
+      }
+    });
+    aiInput.addEventListener('input', () => {
+      aiInput.style.height = 'auto';
+      aiInput.style.height = `${Math.min(aiInput.scrollHeight, 150)}px`;
+    });
+    document.querySelector('#ai-quick-actions').addEventListener('click', (event) => {
+      const quickAction = event.target.closest('button');
+      if (quickAction) sendAiMessage(quickAction.textContent);
+    });
+    document.querySelectorAll('[data-chart-period]').forEach((button) => button.addEventListener('click', () => {
+      document.querySelectorAll('[data-chart-period]').forEach((periodButton) => {
+        const selected = periodButton === button;
+        periodButton.classList.toggle('active', selected);
+        periodButton.setAttribute('aria-pressed', String(selected));
+      });
+      renderProcurementChart(button.dataset.chartPeriod);
+    }));
+    document.querySelectorAll('[data-ai-prompt]').forEach((button) => button.addEventListener('click', () => {
+      const prompt = button.dataset.aiPrompt;
+      openView('ai-assistant');
+      sendAiMessage(prompt);
+    }));
+    document.querySelector('#dashboard-procurements').addEventListener('keydown', (event) => {
+      if ((event.key === 'Enter' || event.key === ' ') && event.target.matches('[data-dashboard-procurement]')) {
+        event.preventDefault();
+        showDashboardProcurement(event.target.dataset.dashboardProcurement);
+      }
+    });
+    checkAiAvailability();
+    const routePath = location.pathname.replace(/\/$/, '');
+    const initialView = routePath === '/dashboard/ai-assistant' ? 'ai-assistant' : location.hash.slice(1);
+    if (pageCopy[initialView]) openView(initialView);
+    renderAll();
+  </script>
+</body>
+</html>
+
